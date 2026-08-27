@@ -1,9 +1,25 @@
-"""The agent: planning, tools, grounding, and the failure ladder.
+"""The agent: planning, tools, grounding, and the audit log.
 
-Most of this package is added in phases 4 and 5.
+The failure ladder (Rung selection) is added in phase 5.
 """
 
+from outpost.agent.audit import AuditLog, AuditRecord
 from outpost.agent.degrade import Rung
-from outpost.agent.ground import Citation
+from outpost.agent.ground import Citation, GroundingResult, ground_answer
+from outpost.agent.handle import RequestResult, handle_request
+from outpost.agent.plan import PlanResult, Step
+from outpost.agent.plan import run as run_plan
 
-__all__ = ["Citation", "Rung"]
+__all__ = [
+    "AuditLog",
+    "AuditRecord",
+    "Citation",
+    "GroundingResult",
+    "PlanResult",
+    "RequestResult",
+    "Rung",
+    "Step",
+    "ground_answer",
+    "handle_request",
+    "run_plan",
+]
