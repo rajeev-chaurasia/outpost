@@ -1,0 +1,28 @@
+{
+  "utility_ops": {
+    "auto_mapped_percentage": 77.3,
+    "indexed_chunk_count": 2,
+    "isolation": {
+      "other_tenant_chunk_count": 5,
+      "shares_no_chunk_ids": true,
+      "this_tenant_chunk_count": 2
+    },
+    "manual_interventions": 0,
+    "mapped_count": 51,
+    "needs_review_count": 5,
+    "onboarding_seconds": 123.0,
+    "source_record_counts": {
+      "service_agreements": 2,
+      "technician_notes": 4,
+      "work_orders": 6
+    },
+    "unmapped_count": 10,
+    "verification": {
+      "answer": "The service agreement for account **ACC\u2011701** specifies a **response time of 4\u202fhours**.",
+      "citation_count": 1,
+      "question": "What is the response time on the service agreement for account ACC-701?",
+      "rung": "FULL",
+      "unsupported_count": 0
+    }
+  }
+}
