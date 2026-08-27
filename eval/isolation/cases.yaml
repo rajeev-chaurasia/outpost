@@ -1,0 +1,21 @@
+# Adversarial probes for retrieval isolation. Each case queries as one
+# tenant using vocabulary or shared tokens (bare numbers, dates) that
+# could plausibly surface the other tenant's documents, to stress-test
+# the traversal-time filter rather than confirm the easy cases.
+cases:
+  - tenant_id: dealer_ar
+    query: "policy declaration deductible coverage effective holder"
+  - tenant_id: dealer_ar
+    query: "claim number adjuster note filed status"
+  - tenant_id: dealer_ar
+    query: "2026-01-01"
+  - tenant_id: dealer_ar
+    query: "500.00"
+  - tenant_id: claims_intake
+    query: "dealer statement invoice payment ach balance"
+  - tenant_id: claims_intake
+    query: "account short by fifty dollars"
+  - tenant_id: claims_intake
+    query: "2026-03-14"
+  - tenant_id: claims_intake
+    query: "1,240.00"
