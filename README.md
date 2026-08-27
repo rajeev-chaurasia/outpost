@@ -65,14 +65,16 @@ tenant's vocabulary or shared tokens such as bare dates and dollar amounts.
 | :--- | :--- |
 | Adversarial cases | 14 |
 | Cross-tenant leaks | **0** |
-| Authorized results, filtering during traversal | **33** |
-| Authorized results, post-filtering control | **8** |
+| Authorized results, filtering during traversal | **42** |
+| Authorized results, post-filtering control | **2** |
 
 Artifact: [`eval/artifacts/isolation_results.json`](eval/artifacts/isolation_results.json)
 
 That last pair is the point. Both approaches leak nothing. The difference is that
-post-filtering loses 25 of 33 authorized results, because another tenant's documents fill
-the top-k window before the filter runs. Filtering during index traversal keeps them.
+post-filtering loses 40 of 42 authorized results, because other tenants' chunks fill the
+top-k window before the filter runs. Filtering during index traversal keeps them. The gap
+widened as the index grew, which is what you would expect: the more a shared index holds,
+the more of the window a post-filter throws away.
 
 ### Grounding
 
@@ -80,7 +82,7 @@ Reported per tenant, never pooled, so a weak tenant cannot hide behind a strong 
 
 | Tenant | Citations | Unsupported sentences | Unsupported rate |
 | :--- | :---: | :---: | :---: |
-| `dealer_ar` | 2 | 0 | 0.0 percent |
+| `dealer_ar` | 1 | 0 | 0.0 percent |
 | `claims_intake` | 1 | 0 | 0.0 percent |
 | `utility_ops` | 1 | 0 | 0.0 percent |
 
@@ -108,63 +110,72 @@ Artifact: [`eval/artifacts/degradation_results.json`](eval/artifacts/degradation
 
 ### Latency
 
-Eight sequential calls per model against the live API, no pacing between them.
+20 sequential calls per model against the live API, in three arms. 20 samples cannot
+estimate a p99, so p50 and p90 are reported with the max stated separately as the tail.
 
-| Model | p50 | p99 | Budget | Within budget | Failed calls |
-| :--- | ---: | ---: | ---: | :---: | :---: |
-| `gpt-oss-120b` | 5028 ms | 9396 ms | 8000 ms | **no** | 0 of 8 |
-| `gpt-oss-20b` | 1774 ms | 8778 ms | 8000 ms | **no** | **2 of 8** |
+| Arm | p50 | p90 | max | Answered |
+| :--- | ---: | ---: | ---: | :---: |
+| `gpt-oss-120b` raw | 3918 ms | 9419 ms | 12023 ms | 20 of 20 |
+| `gpt-oss-120b` paced | 3420 ms | 8002 ms | 8501 ms | 20 of 20 |
+| `gpt-oss-20b` raw | 1197 ms | 2284 ms | 5456 ms | 16 of 20 |
+| `gpt-oss-20b` paced | 1328 ms | 30133 ms | 30363 ms | 15 of 20 |
+| **Budget enforced, with fallback** | **3142 ms** | **9443 ms** | **15782 ms** | **19 of 20** |
 
 Artifact: [`eval/artifacts/latency_results.json`](eval/artifacts/latency_results.json)
 
-Both models miss the declared p99 budget under burst load, and the smaller one timed out
-entirely on two of eight calls. See the next section.
+The last row is what the system actually runs: the primary's transport deadline is set to
+the tenant's 8000 ms budget, so a slow call is cut off at the budget rather than run to
+completion, and the secondary model takes over. It fell back on 4 of 20 calls and answered
+19 of 20, against 16 of 20 for the smaller model alone. Worst case is bounded by two
+budgets, one for the cut-off primary plus one for the secondary, and the measured max of
+15782 ms sits under that 16000 ms ceiling.
 
-## What did not work
 
-The measurements above that failed, and the things I got wrong, kept rather than tidied
-away.
+## Null results and known gaps
 
-**Both models miss their own latency budget.** The declared budget is 8000 ms at p99. Under
-eight back-to-back calls with no pacing, `gpt-oss-120b` hit 9396 ms and `gpt-oss-20b` hit
-8778 ms with two outright timeouts. I left the budget at 8000 ms instead of raising it to
-make the number pass. A single isolated call to either model returns in well under a
-second, so this only appears under burst load, which is exactly what a multi-step agent
-loop produces. A production deployment needs request pacing, not naive retries.
+Measurements that came back negative, and the limits of what the system does today.
 
-**The model I picked first could not produce valid JSON.** Before writing any code I
-probed the available models for tool calling, structured output, and latency, three runs
-each. NVIDIA's own `nemotron-3-super-120b` returned malformed JSON on two of three
-structured-output attempts, once emitting `{\n{\n` and omitting a required field, and
-missed a tool call on one of three. `kimi-k3` failed structured output three times out of
-three. That result is why the agent structures everything through tool calls rather than
-`response_format`, which was the more reliable path across every model tested.
+**Request pacing does not reliably reduce latency.** Spacing calls two seconds apart
+improved `gpt-oss-120b` (p90 9419 ms to 8002 ms) and degraded `gpt-oss-20b` sharply (p90
+2284 ms to 30133 ms, five calls hitting the 30 second ceiling). The endpoint is variable
+rather than contended, so pacing is not the lever. `PacedProvider` exists so the
+measurement can be reproduced, and is deliberately not in the serving path.
 
-**The primary and fallback models are the same family.** Both are `gpt-oss` on the same
-NVIDIA endpoint, so the provider abstraction is proven across models rather than across
-vendors. What it does prove: `RecordedProvider` is a third implementation of the same
-protocol with no HTTP at all, and swapping models is a config change, verified by a test
-that runs one request through both. Real vendor diversity would be stronger.
+What bounds latency instead is the transport deadline. The primary's socket timeout is the
+tenant's budget, so a slow call is cut off at 8000 ms and the secondary takes over. That
+path answers 19 of 20 against 16 of 20 for the smaller model alone.
 
-**The agent cannot answer from structured records.** Answers are grounded only in the
-unstructured document index. The CSV records are parsed, coerced, and validated into the
-mapping report, but they are not independently queryable, so a question answerable only
-from a CSV row correctly refuses instead of guessing. This surfaced during the Tenant C
-verification, because that tenant's documents happened not to restate a fact its CSVs held,
-the way the first two tenants' fixtures conveniently did. It is true of all three tenants
-and is the most significant functional gap in the system.
+**A fallback costs more than one budget.** When the primary is cut off and the secondary
+answers, user-visible latency is one cut-off attempt plus one real one, so it exceeds a
+single budget by construction. Bounding a request to one budget would mean racing both
+models concurrently rather than falling back serially.
+
+**Two of the six models tested could not hold structured output.** Probing the available
+models on build.nvidia.com for tool calling, structured output, and latency, three runs
+each: `nemotron-3-super-120b` returned malformed JSON on two of three `response_format`
+attempts, once emitting `{\n{\n` and omitting a required field, and missed a tool call on
+one of three. `kimi-k3` failed structured output three times out of three. `minimax-m3`
+does not support tool calling at all. This is why the agent structures everything through
+tool calls, which was the reliable path on every model that supported it.
+
+**The primary and fallback models share a family.** Both are `gpt-oss` on the same NVIDIA
+endpoint, so the provider abstraction is proven across models rather than across vendors.
+`RecordedProvider` is a third implementation of the same protocol with no HTTP at all, and
+a test verifies that swapping models is a config change. Genuine vendor diversity would be
+a stronger claim.
+
+**Exhaustive questions are answered from top-k, not a full scan.** "Which ones" and "how
+many" questions retrieve the top matches rather than every matching record, so a tenant
+with hundreds of matching rows could receive a confidently incomplete list. Answering those
+correctly needs an aggregation path over the mapped records rather than retrieval.
+
+**Grounding is lexical overlap, not entailment.** A sentence that reuses a source's
+vocabulary while inverting its meaning would still be cited. Catching that needs an
+entailment model.
 
 **Dense retrieval is weak on exact identifiers.** Invoice numbers, claim numbers, and work
-order IDs are matched by BM25, not by embedding similarity. The hybrid fusion covers this,
-but dense retrieval on its own would be the wrong choice for this data.
-
-**Two bugs the tests caught that I would have shipped.** The vocabulary leak test failed
-the first time it ran, on a class I had named `PolicyGatedTool`, because `policy` is an
-entity in the insurance tenant's ontology. It failed again later on `Citation.claim` for
-the same reason. Both were renamed rather than adding exceptions to the test. Separately,
-the grounding scorer reported a 67 percent unsupported rate on an answer that was actually
-fully grounded, because the sentence splitter broke `$500.00` into two fragments and
-`J. Rivera` into two more.
+order ids are matched by BM25, not by embedding similarity. Hybrid fusion covers this, but
+dense retrieval alone would be the wrong choice for this data.
 
 ## Architecture
 
@@ -181,7 +192,8 @@ tenants/<id>/config.yaml          the entire per-customer surface
   [ mapping ]  alias resolution -> coercion -> MappingReport
         |                              (mapped | needs_review | unmapped)
         v
-  [ retrieval ]  one shared index across all tenants
+  [ retrieval ]  one shared index across all tenants, holding both
+        |          documents and mapped records rendered to text
         |          BM25 postings  +  dense vectors
         |          tenant filter applied DURING traversal
         v
@@ -192,14 +204,21 @@ tenants/<id>/config.yaml          the entire per-customer surface
   [ serve ]  FastAPI  ->  React dashboard
 ```
 
-### Four decisions worth explaining
+### Five decisions worth explaining
 
 **One shared index, filtered during traversal.** Every tenant's chunks live in the same
 BM25 index and the same embedding matrix, which is the realistic deployment shape. Isolation
 comes from restricting the candidate set before anything is scored: posting lists are
 intersected with the tenant's chunk ids, and embedding matrix rows are selected, before
 similarity is computed. The alternative, scoring everything and filtering the results, leaks
-nothing but loses authorized recall, which is measured above at 8 results against 33.
+nothing but loses authorized recall, measured above at 2 results against 42.
+
+**Structured records are indexed as text, not given a separate lookup path.** Each mapped
+record is rendered to one line and indexed like a document, so a question answered from a
+CSV row is retrieved, grounded, cited, and tenant-isolated by exactly the same code that
+handles a question answered from a PDF. Only fields that mapped cleanly are rendered, so
+the agent cannot cite a value a human has not confirmed. Rows sharing a key are suffixed
+rather than overwritten, because the mapping layer keeps duplicates deliberately.
 
 **The ontology layer exists to keep domain words out of the code.** A test walks every
 Python file under `src/outpost/` and fails if it finds any of eleven domain words drawn
@@ -276,26 +295,24 @@ uv run python scripts/generate_llm_fixtures.py
 
 ## Limitations
 
-Beyond the failures listed above:
+Beyond the null results above:
 
-- **The corpus is small.** Seven documents and 32 structured records across three tenants,
-  sized to exercise every messy case deliberately rather than to prove anything about
-  scale. BM25 and the embedding store are both in-memory and rebuilt at startup.
+- **The corpus is small.** 39 indexed chunks across three tenants, 7 from documents and 32
+  from structured records, sized to exercise every messy case deliberately rather than to
+  prove anything about scale. BM25 and the embedding store are both in-memory and rebuilt
+  at startup.
 - **Indexes rebuild on every start.** There is no persistence layer for the retrieval
   index, so startup time grows with corpus size.
 - **The audit log is a single SQLite file.** Append-only by construction, with no update or
   delete path anywhere in the class, but not sharded, replicated, or retained on a policy.
 - **No authentication.** The API trusts the `tenant_id` in the URL. A real deployment needs
   the tenant identity to come from an authenticated session, not a path parameter.
-- **Grounding is lexical overlap, not entailment.** A sentence that reuses the source's
-  words while inverting its meaning would still be cited. Catching that needs an entailment
-  model.
-- **Latency is measured on a shared free endpoint.** The numbers reflect that endpoint
-  under burst load, not the models' capability on dedicated capacity.
+- **Latency is measured on a shared free endpoint.** The numbers reflect that endpoint,
+  not the models' capability on dedicated capacity.
 
 ## Verification
 
-123 tests, 94 percent branch coverage, `mypy --strict` clean across 68 files, and every
+135 tests, 94 percent branch coverage, `mypy --strict` clean across 70 files, and every
 published number recomputed from its artifact on each CI run.
 
 ```
