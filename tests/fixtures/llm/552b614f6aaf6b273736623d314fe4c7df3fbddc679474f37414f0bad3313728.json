@@ -3,16 +3,16 @@
     "content": null,
     "tool_calls": [
       {
-        "id": "chatcmpl-tool-88894690f68ab0cb",
+        "id": "chatcmpl-tool-9ab84e015cf701ea",
         "name": "search",
         "arguments": {
-          "query": "INV-1001"
+          "query": "POL-500 deductible policyholder"
         }
       }
     ],
     "usage": {
-      "prompt_tokens": 190,
-      "completion_tokens": 41
+      "prompt_tokens": 189,
+      "completion_tokens": 50
     }
   }
 }

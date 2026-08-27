@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "I\u2019m sorry\u2014I\u2019m unable to flag the discrepancy for you at this time due to system permissions. You may need to record the short\u2011payment manually or contact someone with the appropriate access to flag the invoice. If there\u2019s anything else I can help with, please let me know.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 266,
+      "completion_tokens": 195
+    }
+  }
+}

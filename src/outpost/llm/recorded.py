@@ -17,6 +17,10 @@ from outpost.llm.errors import ProviderError
 
 
 def request_key(model: str, messages: list[Message], tools: list[ToolSpec] | None) -> str:
+    # tool_call_id is excluded deliberately: it is an opaque id the
+    # provider assigns per call, not part of the request's meaning, so
+    # two semantically identical requests must not hash differently just
+    # because a live provider happened to mint a different id each time.
     normalized = {
         "model": model,
         "messages": [
@@ -24,7 +28,6 @@ def request_key(model: str, messages: list[Message], tools: list[ToolSpec] | Non
                 "role": message.role,
                 "content": message.content,
                 "name": message.name,
-                "tool_call_id": message.tool_call_id,
                 "tool_calls": [
                     {"name": call.name, "arguments": call.arguments}
                     for call in (message.tool_calls or [])
