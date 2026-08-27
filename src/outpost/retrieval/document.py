@@ -1,8 +1,4 @@
-"""Shared retrieval types.
-
-Document and Chunk are added in phase 3, once chunking and indexing exist
-to produce them.
-"""
+"""Shared retrieval types."""
 
 from pydantic import BaseModel, ConfigDict
 
@@ -21,3 +17,26 @@ class Span(BaseModel):
     start: int
     end: int
     text: str
+
+
+class Document(BaseModel):
+    """One source document, before chunking."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: str
+    source_id: str
+    tenant_id: str
+    text: str
+
+
+class Chunk(BaseModel):
+    """One retrievable slice of a document, still traceable back to the
+    exact source text it came from via span.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: str
+    tenant_id: str
+    span: Span
