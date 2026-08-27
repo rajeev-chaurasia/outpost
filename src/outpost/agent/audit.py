@@ -30,7 +30,10 @@ class AuditRecord:
 
 class AuditLog:
     def __init__(self, db_path: Path) -> None:
-        self._connection = sqlite3.connect(db_path)
+        # FastAPI runs sync route handlers in a worker thread pool, so the
+        # connection built at startup gets used from a different thread
+        # than the one that created it; sqlite3 refuses that by default.
+        self._connection = sqlite3.connect(db_path, check_same_thread=False)
         self._connection.execute(
             """
             CREATE TABLE IF NOT EXISTS audit_log (
