@@ -131,6 +131,7 @@ def test_write_action_outside_allowed_actions_is_refused_and_audited(tmp_path: P
     assert result.plan.steps[0].result == {
         "executed": False,
         "reason": "flag_discrepancy is not in the tenant's allowed actions",
+        "draft": {"entity_key": "INV-1005", "reason": "short paid"},
     }
 
     stored = audit_log.get(result.request_id)

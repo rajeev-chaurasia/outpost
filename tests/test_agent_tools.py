@@ -70,6 +70,7 @@ def test_action_gated_tool_declines_action_outside_allowed_actions() -> None:
     assert result == {
         "executed": False,
         "reason": "flag_discrepancy is not in the tenant's allowed actions",
+        "draft": {"entity_key": "W-1", "reason": "short paid"},
     }
 
 

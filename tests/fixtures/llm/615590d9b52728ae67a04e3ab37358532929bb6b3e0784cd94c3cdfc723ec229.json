@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "I\u2019m sorry\u2014I\u2019m unable to flag the discrepancy for you at this time. If there\u2019s anything else I can help with (such as providing details about the invoice, drafting a note for your records, or guiding you through the next steps), please let me know!",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 289,
+      "completion_tokens": 177
+    }
+  }
+}

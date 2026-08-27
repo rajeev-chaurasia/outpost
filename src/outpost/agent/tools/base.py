@@ -39,5 +39,9 @@ class ActionGatedTool:
     def invoke(self, arguments: dict[str, Any]) -> Any:
         name = self.spec.name
         if name not in self.allowed_actions:
-            return {"executed": False, "reason": f"{name} is not in the tenant's allowed actions"}
+            return {
+                "executed": False,
+                "reason": f"{name} is not in the tenant's allowed actions",
+                "draft": arguments,
+            }
         return self.tool.invoke(arguments)
