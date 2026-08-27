@@ -14,8 +14,8 @@ from outpost.agent.audit import AuditLog
 from outpost.agent.handle import handle_request
 from outpost.agent.tools import ActionGatedTool, DraftResponseTool, FlagDiscrepancyTool, SearchTool
 from outpost.agent.tools.base import Tool
+from outpost.llm.budget import build_budgeted_provider
 from outpost.llm.fallback import FallbackProvider
-from outpost.llm.openai_compatible import OpenAICompatibleProvider
 from outpost.onboard.report import ingest_tenant
 from outpost.ontology import load_tenant_config
 
@@ -73,9 +73,19 @@ def ask(tenant_id: str, question: str) -> None:
         "flag_discrepancy": ActionGatedTool(tool=FlagDiscrepancyTool(), allowed_actions=allowed),
         "draft_response": ActionGatedTool(tool=DraftResponseTool(), allowed_actions=allowed),
     }
+    # The transport deadline is the tenant's own budget, so a slow
+    # primary is cut off at the budget rather than after it.
     provider = FallbackProvider(
-        primary=OpenAICompatibleProvider(model=PRIMARY_MODEL),
-        secondary=OpenAICompatibleProvider(model=FALLBACK_MODEL),
+        primary=build_budgeted_provider(
+            PRIMARY_MODEL,
+            latency_p99_ms=config.budget.latency_p99_ms,
+            max_tokens_per_request=config.budget.max_tokens_per_request,
+        ),
+        secondary=build_budgeted_provider(
+            FALLBACK_MODEL,
+            latency_p99_ms=config.budget.latency_p99_ms,
+            max_tokens_per_request=config.budget.max_tokens_per_request,
+        ),
     )
     AUDIT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     audit_log = AuditLog(AUDIT_DB_PATH)

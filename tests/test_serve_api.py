@@ -49,7 +49,7 @@ def _test_app(tmp_path: Path) -> FastAPI:
     state = AppState(
         tenants=tenants_runtime,
         audit_log=AuditLog(tmp_path / "audit.sqlite"),
-        provider_factory=lambda: RecordedProvider(
+        provider_factory=lambda _budget: RecordedProvider(
             fixtures_dir=LLM_FIXTURES_DIR, model="openai/gpt-oss-120b"
         ),
     )

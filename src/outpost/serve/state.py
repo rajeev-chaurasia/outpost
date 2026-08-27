@@ -11,9 +11,9 @@ from outpost.agent.audit import AuditLog
 from outpost.agent.tools import ActionGatedTool, DraftResponseTool, FlagDiscrepancyTool, SearchTool
 from outpost.agent.tools.base import Tool
 from outpost.llm.base import Provider
+from outpost.llm.budget import build_budgeted_provider
 from outpost.llm.fallback import FallbackProvider
-from outpost.llm.openai_compatible import OpenAICompatibleProvider
-from outpost.ontology import TenantConfig, discover_tenant_ids, load_tenant_config
+from outpost.ontology import BudgetConfig, TenantConfig, discover_tenant_ids, load_tenant_config
 from outpost.retrieval.build import build_multi_tenant_index
 from outpost.retrieval.dense import (
     DenseStore,
@@ -44,13 +44,27 @@ class TenantRuntime:
     system_prompt: str
 
 
-def _default_provider_factory() -> Provider:
-    # A fresh FallbackProvider per call: fell_back is per-instance state,
-    # and reusing one across requests would leak a fallback from an
-    # earlier request into a later one's rung.
+def _default_provider_factory(budget: BudgetConfig) -> Provider:
+    # Built per request, for two reasons. fell_back is per-instance
+    # state, so reusing one instance would leak an earlier request's
+    # fallback into a later request's rung. And the budget comes from the
+    # tenant being served, so it cannot be baked in once at startup.
+    #
+    # build_budgeted_provider sets the transport deadline to the budget,
+    # which is what actually cuts off a slow primary; the post-hoc check
+    # inside BudgetedProvider alone would fire only after the user had
+    # already waited.
     return FallbackProvider(
-        primary=OpenAICompatibleProvider(model=PRIMARY_MODEL),
-        secondary=OpenAICompatibleProvider(model=FALLBACK_MODEL),
+        primary=build_budgeted_provider(
+            PRIMARY_MODEL,
+            latency_p99_ms=budget.latency_p99_ms,
+            max_tokens_per_request=budget.max_tokens_per_request,
+        ),
+        secondary=build_budgeted_provider(
+            FALLBACK_MODEL,
+            latency_p99_ms=budget.latency_p99_ms,
+            max_tokens_per_request=budget.max_tokens_per_request,
+        ),
     )
 
 
@@ -60,10 +74,10 @@ class AppState:
     audit_log: AuditLog
     # Injectable so tests can substitute a RecordedProvider instead of
     # ever constructing a live OpenAICompatibleProvider.
-    provider_factory: Callable[[], Provider] = field(default=_default_provider_factory)
+    provider_factory: Callable[[BudgetConfig], Provider] = field(default=_default_provider_factory)
 
-    def provider(self) -> Provider:
-        return self.provider_factory()
+    def provider(self, budget: BudgetConfig) -> Provider:
+        return self.provider_factory(budget)
 
 
 def _build_tenant_runtime(

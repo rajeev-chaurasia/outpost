@@ -17,7 +17,7 @@ def query_tenant(tenant_id: str, body: QueryRequest, request: Request) -> QueryR
         raise HTTPException(status_code=404, detail=f"unknown tenant {tenant_id!r}")
 
     result = handle_request(
-        state.provider(),
+        state.provider(runtime.config.budget),
         runtime.tools,
         state.audit_log,
         tenant_id=tenant_id,
