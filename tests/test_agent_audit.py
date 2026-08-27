@@ -4,6 +4,7 @@ append-only log with no gaps, and there is no update or delete path to
 lose along the way.
 """
 
+from dataclasses import replace
 from pathlib import Path
 
 from outpost.agent.audit import AuditLog, AuditRecord
@@ -73,4 +74,29 @@ def test_multiple_requests_are_all_retrievable_independently(tmp_path: Path) -> 
 
 def test_audit_log_class_exposes_no_update_or_delete_method() -> None:
     public_methods = {name for name in dir(AuditLog) if not name.startswith("_")}
-    assert public_methods == {"append", "get"}
+    assert public_methods == {"append", "get", "list_by_tenant"}
+
+
+def test_list_by_tenant_returns_only_that_tenants_records_newest_first(tmp_path: Path) -> None:
+    log = AuditLog(tmp_path / "audit.sqlite")
+    dealer_record = _record("req-1")
+    other_record = replace(dealer_record, request_id="req-2", tenant_id="claims_intake")
+    later_dealer_record = replace(
+        dealer_record, request_id="req-3", created_at="2026-08-27T01:00:00+00:00"
+    )
+    log.append(dealer_record)
+    log.append(other_record)
+    log.append(later_dealer_record)
+
+    results = log.list_by_tenant("dealer_ar")
+
+    assert [record.request_id for record in results] == ["req-3", "req-1"]
+    assert all(record.tenant_id == "dealer_ar" for record in results)
+
+
+def test_list_by_tenant_respects_limit(tmp_path: Path) -> None:
+    log = AuditLog(tmp_path / "audit.sqlite")
+    for i in range(5):
+        log.append(_record(f"req-{i}"))
+
+    assert len(log.list_by_tenant("dealer_ar", limit=2)) == 2

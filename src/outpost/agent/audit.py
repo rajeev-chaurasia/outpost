@@ -71,6 +71,13 @@ class AuditLog:
         ).fetchone()
         return None if row is None else _row_to_record(row)
 
+    def list_by_tenant(self, tenant_id: str, *, limit: int = 50) -> list[AuditRecord]:
+        rows = self._connection.execute(
+            "SELECT * FROM audit_log WHERE tenant_id = ? ORDER BY created_at DESC LIMIT ?",
+            (tenant_id, limit),
+        ).fetchall()
+        return [_row_to_record(row) for row in rows]
+
 
 def _step_to_dict(step: Step) -> dict[str, Any]:
     return {"tool_name": step.tool_name, "arguments": step.arguments, "result": step.result}
