@@ -1,0 +1,54 @@
+tenant_id: claims_intake
+display_name: Insurance Claims Intake
+
+ontology:
+  entities:
+    - name: claim
+      key: claim_number
+      fields: [claim_number, policy_number, claimant_name, incurred_date, filed_date, status, amount_requested]
+    - name: policy
+      key: policy_number
+      fields: [policy_number, holder_name, coverage_type, effective_date, expiration_date, deductible]
+    - name: adjuster_note
+      key: note_id
+      fields: [note_id, claim_number, adjuster_name, note_date, content]
+  relations:
+    - name: covered_by
+      from: claim
+      to: policy
+    - name: annotated_by
+      from: adjuster_note
+      to: claim
+
+sources:
+  - id: claims
+    connector: csv_export
+    path: fixtures/claims.csv
+    entity: claim
+    field_map:
+      claim_number: [claim_no, claim_num, "Claim #"]
+      amount_requested: [amt_requested, requested_amount, "Amount Requested"]
+      filed_date: [date_filed, filed, "Filed Date"]
+  - id: adjuster_notes
+    connector: csv_export
+    path: fixtures/adjuster_notes.csv
+    entity: adjuster_note
+    field_map:
+      note_id: [note_no, id]
+      claim_number: [claim_no, claim_num]
+  - id: policies
+    connector: pdf_text
+    path: fixtures/policies/
+    entity: null
+
+terminology:
+  discrepancy: "missing documentation"
+  account: "policyholder"
+
+actions:
+  allowed: [flag_discrepancy, draft_response]
+  requires_review: [draft_response]
+
+budget:
+  latency_p99_ms: 8000
+  max_tokens_per_request: 4000
