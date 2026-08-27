@@ -19,3 +19,15 @@ cases:
     query: "2026-03-14"
   - tenant_id: claims_intake
     query: "1,240.00"
+  - tenant_id: utility_ops
+    query: "policy declaration deductible coverage holder"
+  - tenant_id: utility_ops
+    query: "dealer statement invoice payment ach balance"
+  - tenant_id: utility_ops
+    query: "2026-01-01"
+  - tenant_id: utility_ops
+    query: "account"
+  - tenant_id: dealer_ar
+    query: "service agreement response time work order technician"
+  - tenant_id: claims_intake
+    query: "work order scheduled completed meter replacement"

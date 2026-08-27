@@ -1,0 +1,27 @@
+{
+  "case_count": 14,
+  "per_tenant": {
+    "claims_intake": {
+      "cases": 5,
+      "leaks": 0,
+      "post_filter_results": 0,
+      "traversal_results": 10
+    },
+    "dealer_ar": {
+      "cases": 5,
+      "leaks": 0,
+      "post_filter_results": 4,
+      "traversal_results": 15
+    },
+    "utility_ops": {
+      "cases": 4,
+      "leaks": 0,
+      "post_filter_results": 4,
+      "traversal_results": 8
+    }
+  },
+  "post_filter_authorized_results": 8,
+  "total_leaks": 0,
+  "traversal_authorized_results": 33,
+  "zero_leak_invariant_met": true
+}

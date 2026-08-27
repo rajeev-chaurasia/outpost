@@ -7,12 +7,12 @@ every chunk resolves back to exact source text at its recorded offsets.
 from pathlib import Path
 
 from eval.isolation.adversarial import (
-    TENANT_IDS,
     TENANTS_DIR,
     build_multi_tenant_index,
     load_cases,
     run_isolation_suite,
 )
+from outpost.ontology import discover_tenant_ids
 from outpost.retrieval.document import Chunk
 
 
@@ -62,7 +62,9 @@ def test_indexed_chunks_resolve_back_to_exact_fixture_text() -> None:
         checked += 1
 
     assert checked == len(lexical_index.chunks)
-    assert {chunk.tenant_id for chunk in lexical_index.chunks.values()} == set(TENANT_IDS)
+    assert {chunk.tenant_id for chunk in lexical_index.chunks.values()} == set(
+        discover_tenant_ids(TENANTS_DIR)
+    )
 
 
 def _document_path(tenant_dir: Path, chunk: Chunk) -> Path:
