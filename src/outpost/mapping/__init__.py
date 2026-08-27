@@ -1,8 +1,15 @@
-"""Field mapping between raw tenant data and the ontology.
+"""Field mapping between raw tenant data and the ontology."""
 
-Connectors and the resolver are added in phase 2.
-"""
+from outpost.mapping.coerce import CoerceResult, classify_field_kind, coerce_value
+from outpost.mapping.report import MappingEntry, MappingOutcome, MappingReport
+from outpost.mapping.resolve import resolve_records
 
-from outpost.mapping.report import MappingOutcome
-
-__all__ = ["MappingOutcome"]
+__all__ = [
+    "CoerceResult",
+    "MappingEntry",
+    "MappingOutcome",
+    "MappingReport",
+    "classify_field_kind",
+    "coerce_value",
+    "resolve_records",
+]
