@@ -1,0 +1,38 @@
+{
+  "openai/gpt-oss-120b": {
+    "budget_ms": 8000,
+    "failed_samples": 0,
+    "p50_ms": 5028.1,
+    "p99_ms": 9395.7,
+    "sample_count": 8,
+    "samples_ms": [
+      4218.5,
+      5028.1,
+      821.6,
+      3278.5,
+      4337.8,
+      5777.8,
+      7960.7,
+      9395.7
+    ],
+    "successful_samples": 8,
+    "within_budget": false
+  },
+  "openai/gpt-oss-20b": {
+    "budget_ms": 8000,
+    "failed_samples": 2,
+    "p50_ms": 1774.1,
+    "p99_ms": 8778.4,
+    "sample_count": 8,
+    "samples_ms": [
+      1271.7,
+      2403.2,
+      599.3,
+      1774.1,
+      2371.7,
+      8778.4
+    ],
+    "successful_samples": 6,
+    "within_budget": false
+  }
+}

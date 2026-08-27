@@ -5,6 +5,7 @@ FallbackProvider turns a budget breach into an actual fallback, the
 same as any other provider failure.
 """
 
+import json
 import time
 from dataclasses import dataclass
 
@@ -96,3 +97,28 @@ def test_latency_budget_breach_triggers_fallback() -> None:
 
     assert fallback.fell_back is True
     assert completion.content == "ok"
+
+
+def test_latency_artifact_has_expected_shape() -> None:
+    """The committed latency_results.json is generated live and its
+    values will change on every remeasurement, so this checks its
+    structure, not its numbers: asserting a live-measured value here
+    would make CI depend on network conditions at measurement time,
+    which is exactly what CI must never do.
+    """
+    from eval.latency.measure import ARTIFACT_PATH, MODELS
+
+    payload = json.loads(ARTIFACT_PATH.read_text())
+    assert set(payload) == set(MODELS)
+    for model in MODELS:
+        stats = payload[model]
+        assert {
+            "sample_count",
+            "successful_samples",
+            "failed_samples",
+            "samples_ms",
+            "p50_ms",
+            "p99_ms",
+            "budget_ms",
+            "within_budget",
+        } <= set(stats)
