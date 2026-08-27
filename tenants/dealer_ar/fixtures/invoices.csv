@@ -1,0 +1,8 @@
+Invoice #,account_id,Amount Due,Invoice Date,due_date,status,memo
+INV-1001,ACC-1,"$1,240.00",2026-03-14,2026-04-13,open,paid partial
+ INV-1002 ,ACC-2,900.00,14/03/2026,2026-04-13,open,
+INV-1003,ACC-1,NULL,2026-03-20,2026-04-19,paid,
+INV-1004,ACC-3,1500,03/04/2026,2026-05-03,open,
+INV-1005,ACC-2,,2026-03-25,2026-04-24,open,
+INV-1005,ACC-2,650.00,2026-03-25,2026-04-24,open,
+INV-1006,ACC-1,300.00,2026-03-30,2026-04-29,open,late fee applied

@@ -1,0 +1,11 @@
+Statement
+Account: ACC-2
+Period: March 2026
+
+lnvoice lNV-l002 issued
+l4/03/2026 for
+900.00, due
+2026-04-l3.
+
+Ba1ance short by $50.00
+as of 2026-03-20.

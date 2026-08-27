@@ -1,0 +1,6 @@
+Dealer Statement
+Account: ACC-1
+Period: March 2026
+
+Invoice INV-1001 issued 2026-03-14 for $1,240.00, due 2026-04-13.
+Payment PAY-1 received 2026-03-15 for $1,240.00 via ACH. Invoice paid in full.

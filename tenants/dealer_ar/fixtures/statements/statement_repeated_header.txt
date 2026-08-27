@@ -1,0 +1,14 @@
+DEALER STATEMENT - PAGE 1
+Account: ACC-1
+
+Invoice INV-1006 issued 2026-03-30 for $300.00, due 2026-04-29.
+
+DEALER STATEMENT - PAGE 2
+Account: ACC-1
+
+Late fee of $25.00 applied 2026-04-01.
+
+DEALER STATEMENT - PAGE 3
+Account: ACC-1
+
+Balance remaining: $325.00 as of 2026-04-05.
