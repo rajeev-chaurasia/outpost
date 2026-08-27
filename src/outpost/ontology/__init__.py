@@ -5,6 +5,7 @@ from outpost.ontology.config import (
     BudgetConfig,
     SourceConfig,
     TenantConfig,
+    discover_tenant_ids,
     load_tenant_config,
 )
 from outpost.ontology.errors import ConfigValidationError, OntologyError
@@ -20,5 +21,6 @@ __all__ = [
     "SourceConfig",
     "TenantConfig",
     "TenantOntology",
+    "discover_tenant_ids",
     "load_tenant_config",
 ]

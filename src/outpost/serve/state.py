@@ -13,7 +13,7 @@ from outpost.agent.tools.base import Tool
 from outpost.llm.base import Provider
 from outpost.llm.fallback import FallbackProvider
 from outpost.llm.openai_compatible import OpenAICompatibleProvider
-from outpost.ontology import TenantConfig, load_tenant_config
+from outpost.ontology import TenantConfig, discover_tenant_ids, load_tenant_config
 from outpost.retrieval.build import build_multi_tenant_index
 from outpost.retrieval.dense import (
     DenseStore,
@@ -27,7 +27,6 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 TENANTS_DIR = REPO_ROOT / "tenants"
 EMBEDDING_CACHE_PATH = REPO_ROOT / "tests" / "fixtures" / "embeddings" / "retrieval.npz"
 AUDIT_DB_PATH = REPO_ROOT / "var" / "audit.sqlite"
-TENANT_IDS = ["dealer_ar", "claims_intake"]
 PRIMARY_MODEL = "openai/gpt-oss-120b"
 FALLBACK_MODEL = "openai/gpt-oss-20b"
 
@@ -97,9 +96,10 @@ def build_app_state() -> AppState:
         client=NvidiaEmbeddingClient(),
         save_path=EMBEDDING_CACHE_PATH,
     )
-    lexical_index, dense_store = build_multi_tenant_index(TENANT_IDS, TENANTS_DIR, embedding_cache)
+    tenant_ids = discover_tenant_ids(TENANTS_DIR)
+    lexical_index, dense_store = build_multi_tenant_index(tenant_ids, TENANTS_DIR, embedding_cache)
     tenants = {
         tenant_id: _build_tenant_runtime(tenant_id, lexical_index, dense_store)
-        for tenant_id in TENANT_IDS
+        for tenant_id in tenant_ids
     }
     return AppState(tenants=tenants, audit_log=AuditLog(AUDIT_DB_PATH))

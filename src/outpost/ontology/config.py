@@ -98,3 +98,17 @@ def load_tenant_config(path: Path) -> TenantConfig:
     raw = yaml.load(path.read_text(), Loader=_LineTrackingLoader)
     validate_raw_config(raw)
     return TenantConfig.model_validate(_strip_line_markers(raw))
+
+
+def discover_tenant_ids(tenants_dir: Path) -> list[str]:
+    """Finds every tenant with a config.yaml under tenants_dir.
+
+    A new tenant becomes visible to the served app and onboarding
+    tooling by adding a directory and a config file, not by editing a
+    list somewhere in this codebase.
+    """
+    return sorted(
+        child.name
+        for child in tenants_dir.iterdir()
+        if child.is_dir() and (child / "config.yaml").is_file()
+    )

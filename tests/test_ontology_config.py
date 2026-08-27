@@ -8,9 +8,27 @@ from pathlib import Path
 
 import pytest
 
-from outpost.ontology import ConfigValidationError, load_tenant_config
+from outpost.ontology import ConfigValidationError, discover_tenant_ids, load_tenant_config
 
 TENANTS_DIR = Path(__file__).resolve().parents[1] / "tenants"
+
+
+def test_discover_tenant_ids_finds_every_tenant_with_a_config(tmp_path: Path) -> None:
+    (tmp_path / "tenant_a").mkdir()
+    (tmp_path / "tenant_a" / "config.yaml").write_text("placeholder: true")
+    (tmp_path / "tenant_b").mkdir()
+    (tmp_path / "tenant_b" / "config.yaml").write_text("placeholder: true")
+    (tmp_path / "not_a_tenant").mkdir()  # no config.yaml, should be skipped
+    (tmp_path / "stray_file.txt").write_text("ignored")
+
+    assert discover_tenant_ids(tmp_path) == ["tenant_a", "tenant_b"]
+
+
+def test_discover_tenant_ids_finds_the_real_tenants() -> None:
+    # A superset check, not exact equality: this must keep passing once
+    # phase 8 adds a third tenant onboarded cold, without editing this
+    # test being one of the interventions that measurement counts.
+    assert {"claims_intake", "dealer_ar"} <= set(discover_tenant_ids(TENANTS_DIR))
 
 
 def test_dealer_ar_and_claims_intake_load_with_different_entities() -> None:
