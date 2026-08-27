@@ -33,6 +33,7 @@ from outpost.retrieval.lexical import BM25Index  # noqa: E402
 
 FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "llm"
 MODEL = "openai/gpt-oss-120b"
+FALLBACK_MODEL = "openai/gpt-oss-20b"
 
 
 def _run_filling_embedding_gaps(
@@ -93,12 +94,13 @@ def _record_one_scenario(
     lexical_index: BM25Index,
     dense_store: DenseStore,
     embedding_client: NvidiaEmbeddingClient,
+    model: str = MODEL,
 ) -> None:
     search_tool = SearchTool(
         lexical_index=lexical_index, dense_store=dense_store, tenant_id=scenario.tenant_id
     )
     provider = RecordingProvider(
-        inner=OpenAICompatibleProvider(model=MODEL, timeout_seconds=90.0),
+        inner=OpenAICompatibleProvider(model=model, timeout_seconds=90.0),
         fixtures_dir=FIXTURES_DIR,
     )
 
@@ -128,6 +130,21 @@ def record_grounding_scenarios() -> None:
         _record_one_scenario(scenario, lexical_index, dense_store, embedding_client)
 
 
+def record_dealer_ar_with_fallback_model() -> None:
+    """Records the dealer_ar grounding scenario again with the fallback
+    model, proving a model swap is a config change: the same request
+    goes through OpenAICompatibleProvider with nothing touched but the
+    model string, and gpt-oss-20b answers it the same way gpt-oss-120b
+    does, structurally.
+    """
+    lexical_index, dense_store = build_multi_tenant_index()
+    embedding_client = NvidiaEmbeddingClient()
+    dealer_ar_scenario = next(s for s in SCENARIOS if s.tenant_id == "dealer_ar")
+    _record_one_scenario(
+        dealer_ar_scenario, lexical_index, dense_store, embedding_client, model=FALLBACK_MODEL
+    )
+
+
 def record_declined_write_action() -> None:
     tool = ActionGatedTool(tool=FlagDiscrepancyTool(), allowed_actions=frozenset())
     provider = RecordingProvider(
@@ -150,4 +167,5 @@ def record_declined_write_action() -> None:
 
 if __name__ == "__main__":
     record_grounding_scenarios()
+    record_dealer_ar_with_fallback_model()
     record_declined_write_action()

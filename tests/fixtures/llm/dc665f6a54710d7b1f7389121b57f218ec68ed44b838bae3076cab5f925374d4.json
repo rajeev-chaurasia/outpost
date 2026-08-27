@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "Yes \u2013 Invoice\u202fINV\u20111001 was paid in full. A payment (PAY\u20111) of $1,240.00 was received via ACH on 2026\u201103\u201115.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 593,
+      "completion_tokens": 132
+    }
+  }
+}
