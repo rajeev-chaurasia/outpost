@@ -1,0 +1,5 @@
+﻿note_no,claim_no,adjuster_name,note_date,content,internal_flag
+NOTE-1,CLM-2001,R. Alvarez,2026-02-06,Reviewed initial documentation.,false
+NOTE-2,CLM-2002,R. Alvarez,22/02/2026,Requested additional photos.,false
+NOTE-3, CLM-2003 ,T. Nguyen,NULL,Waiting on policy confirmation.,true
+NOTE-4,CLM-2004,T. Nguyen,03/03/2026,Flagged for supervisor review.,true

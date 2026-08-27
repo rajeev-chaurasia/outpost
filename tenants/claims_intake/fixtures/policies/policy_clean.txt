@@ -1,0 +1,7 @@
+Policy Declaration
+Policy Number: POL-500
+Holder: J. Rivera
+Coverage: Comprehensive Auto
+Effective: 2026-01-01
+Expiration: 2026-12-31
+Deductible: $500.00

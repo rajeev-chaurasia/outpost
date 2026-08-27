@@ -1,0 +1,7 @@
+Claim #,policy_number,claimant_name,incurred_date,Filed Date,status,Amount Requested,adjuster_comment
+CLM-2001,POL-500,J. Rivera,2026-02-01,2026-02-05,open,"$4,500.00",initial review pending
+ CLM-2002 ,POL-501,A. Kim,2026-02-10,21/02/2026,open,2200.00,
+CLM-2003,POL-500,M. Chen,2026-02-15,NULL,open,1800.00,
+CLM-2004,POL-502,S. Patel,2026-02-18,05/03/2026,open,3000,late submission
+CLM-2005,POL-501,A. Kim,2026-02-20,2026-02-22,open,,
+CLM-2005,POL-501,A. Kim,2026-02-20,2026-02-22,open,950.00,
