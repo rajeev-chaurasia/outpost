@@ -11,7 +11,7 @@ import hashlib
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, cast
+from typing import Any, Literal, Protocol, cast
 
 import httpx
 import numpy as np
@@ -28,6 +28,17 @@ InputType = Literal["query", "passage"]
 
 def cache_key(text: str, input_type: InputType) -> str:
     return hashlib.sha256(f"{input_type}\x00{text}".encode()).hexdigest()
+
+
+class EmbeddingSource(Protocol):
+    """Anything DenseStore can ask for an embedding: the static,
+    committed EmbeddingCache tests and CI use, or the served app's
+    LiveFallbackEmbeddingCache.
+    """
+
+    def get(self, text: str, input_type: InputType) -> NDArray[np.float32] | None: ...
+
+    def put(self, text: str, input_type: InputType, vector: NDArray[np.float32]) -> None: ...
 
 
 @dataclass
@@ -87,12 +98,42 @@ class NvidiaEmbeddingClient:
 
 
 @dataclass
+class LiveFallbackEmbeddingCache:
+    """Wraps an EmbeddingCache; a miss is computed live through the
+    client, stored back into the wrapped cache, and persisted to disk
+    if a save path is given.
+
+    Used only by the served app, so a user's actual question can be
+    embedded even though it was never in the pre-committed fixture set.
+    Tests and CI use EmbeddingCache directly, never this: their whole
+    point is staying deterministic and keyless.
+    """
+
+    cache: EmbeddingCache
+    client: NvidiaEmbeddingClient
+    save_path: Path | None = None
+
+    def get(self, text: str, input_type: InputType) -> NDArray[np.float32] | None:
+        vector = self.cache.get(text, input_type)
+        if vector is not None:
+            return vector
+        computed = self.client.embed([text], input_type)[0]
+        self.put(text, input_type, computed)
+        return computed
+
+    def put(self, text: str, input_type: InputType, vector: NDArray[np.float32]) -> None:
+        self.cache.put(text, input_type, vector)
+        if self.save_path is not None:
+            self.cache.save(self.save_path)
+
+
+@dataclass
 class DenseStore:
     """Chunk vectors plus cosine similarity scoring, restricted to a
     candidate set before the similarity matrix is ever built.
     """
 
-    cache: EmbeddingCache
+    cache: EmbeddingSource
     vectors: dict[str, NDArray[np.float32]] = field(default_factory=dict)
     chunk_tenant: dict[str, str] = field(default_factory=dict)
 

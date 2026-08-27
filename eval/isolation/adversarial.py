@@ -9,7 +9,7 @@ from pathlib import Path
 import yaml
 
 from outpost.retrieval.build import build_multi_tenant_index as _build_multi_tenant_index
-from outpost.retrieval.dense import DenseStore
+from outpost.retrieval.dense import DenseStore, EmbeddingCache
 from outpost.retrieval.isolation import search, search_post_filtered
 from outpost.retrieval.lexical import BM25Index
 
@@ -36,7 +36,7 @@ def load_cases() -> list[IsolationCase]:
 def build_multi_tenant_index(
     cache_path: Path = EMBEDDING_CACHE_PATH,
 ) -> tuple[BM25Index, DenseStore]:
-    return _build_multi_tenant_index(list(TENANT_IDS), TENANTS_DIR, cache_path)
+    return _build_multi_tenant_index(list(TENANT_IDS), TENANTS_DIR, EmbeddingCache.load(cache_path))
 
 
 @dataclass(frozen=True)

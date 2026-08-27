@@ -15,7 +15,12 @@ from outpost.llm.fallback import FallbackProvider
 from outpost.llm.openai_compatible import OpenAICompatibleProvider
 from outpost.ontology import TenantConfig, load_tenant_config
 from outpost.retrieval.build import build_multi_tenant_index
-from outpost.retrieval.dense import DenseStore
+from outpost.retrieval.dense import (
+    DenseStore,
+    EmbeddingCache,
+    LiveFallbackEmbeddingCache,
+    NvidiaEmbeddingClient,
+)
 from outpost.retrieval.lexical import BM25Index
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -83,9 +88,16 @@ def _build_tenant_runtime(
 
 def build_app_state() -> AppState:
     AUDIT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    lexical_index, dense_store = build_multi_tenant_index(
-        TENANT_IDS, TENANTS_DIR, EMBEDDING_CACHE_PATH
+    # A user's actual question is never fully covered by the committed
+    # fixture cache, so the served app wraps it with a live fallback:
+    # a miss is embedded on demand and persisted back to the same file,
+    # so the cache grows in place as the app is used.
+    embedding_cache = LiveFallbackEmbeddingCache(
+        cache=EmbeddingCache.load(EMBEDDING_CACHE_PATH),
+        client=NvidiaEmbeddingClient(),
+        save_path=EMBEDDING_CACHE_PATH,
     )
+    lexical_index, dense_store = build_multi_tenant_index(TENANT_IDS, TENANTS_DIR, embedding_cache)
     tenants = {
         tenant_id: _build_tenant_runtime(tenant_id, lexical_index, dense_store)
         for tenant_id in TENANT_IDS

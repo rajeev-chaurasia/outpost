@@ -15,6 +15,7 @@ from outpost.agent.tools import SearchTool
 from outpost.llm.recorded import RecordedProvider
 from outpost.ontology import load_tenant_config
 from outpost.retrieval.build import build_multi_tenant_index
+from outpost.retrieval.dense import EmbeddingCache
 from outpost.serve.routes import audit, query, tenants
 from outpost.serve.state import AppState, TenantRuntime
 
@@ -28,7 +29,7 @@ DEALER_AR_SCENARIO = next(s for s in SCENARIOS if s.tenant_id == "dealer_ar")
 
 def _test_app(tmp_path: Path) -> FastAPI:
     lexical_index, dense_store = build_multi_tenant_index(
-        TENANT_IDS, TENANTS_DIR, EMBEDDING_CACHE_PATH
+        TENANT_IDS, TENANTS_DIR, EmbeddingCache.load(EMBEDDING_CACHE_PATH)
     )
     tenants_runtime = {}
     for tenant_id in TENANT_IDS:

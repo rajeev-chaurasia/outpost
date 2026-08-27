@@ -3,12 +3,14 @@ raises instead of silently falling back, and candidate_ids restricts the
 similarity matrix before scoring, not just the returned results.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import pytest
+from numpy.typing import NDArray
 
-from outpost.retrieval.dense import DenseStore, EmbeddingCache
+from outpost.retrieval.dense import DenseStore, EmbeddingCache, LiveFallbackEmbeddingCache
 from outpost.retrieval.document import Chunk, Span
 from outpost.retrieval.errors import EmbeddingCacheMissError
 
@@ -74,3 +76,45 @@ def test_score_restricts_candidates_before_building_similarity_matrix() -> None:
 def test_score_on_empty_store_returns_no_results() -> None:
     store = DenseStore(cache=EmbeddingCache())
     assert store.score(np.array([1.0, 0.0], dtype=np.float32)) == []
+
+
+@dataclass
+class _FakeEmbeddingClient:
+    calls: list[tuple[str, str]]
+
+    def embed(self, texts: list[str], input_type: str) -> list[NDArray[np.float32]]:
+        self.calls.append((texts[0], input_type))
+        return [np.array([9.0, 9.0], dtype=np.float32)]
+
+
+def test_live_fallback_cache_computes_and_persists_a_miss(tmp_path: Path) -> None:
+    save_path = tmp_path / "cache.npz"
+    fake_client = _FakeEmbeddingClient(calls=[])
+    live_cache = LiveFallbackEmbeddingCache(
+        cache=EmbeddingCache(),
+        client=fake_client,  # type: ignore[arg-type]
+        save_path=save_path,
+    )
+
+    vector = live_cache.get("a brand new question", "query")
+
+    assert vector is not None
+    assert list(vector) == [9.0, 9.0]
+    assert fake_client.calls == [("a brand new question", "query")]
+    assert save_path.exists()
+
+    reloaded = EmbeddingCache.load(save_path)
+    assert reloaded.get("a brand new question", "query") is not None
+
+
+def test_live_fallback_cache_reuses_an_existing_hit_without_calling_the_client() -> None:
+    cache = EmbeddingCache()
+    cache.put("known text", "passage", np.array([1.0, 2.0], dtype=np.float32))
+    fake_client = _FakeEmbeddingClient(calls=[])
+    live_cache = LiveFallbackEmbeddingCache(cache=cache, client=fake_client)  # type: ignore[arg-type]
+
+    vector = live_cache.get("known text", "passage")
+
+    assert vector is not None
+    np.testing.assert_allclose(vector, [1.0, 2.0], rtol=1e-2)
+    assert fake_client.calls == []

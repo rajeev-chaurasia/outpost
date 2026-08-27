@@ -12,16 +12,16 @@ from pathlib import Path
 from outpost.connectors.pdf_text import PdfTextConnector
 from outpost.ontology import load_tenant_config
 from outpost.retrieval.chunk import chunk_document
-from outpost.retrieval.dense import DenseStore, EmbeddingCache
+from outpost.retrieval.dense import DenseStore, EmbeddingSource
 from outpost.retrieval.document import Document
 from outpost.retrieval.lexical import BM25Index
 
 
 def build_multi_tenant_index(
-    tenant_ids: list[str], tenants_dir: Path, embedding_cache_path: Path
+    tenant_ids: list[str], tenants_dir: Path, embedding_cache: EmbeddingSource
 ) -> tuple[BM25Index, DenseStore]:
     lexical_index = BM25Index()
-    dense_store = DenseStore(cache=EmbeddingCache.load(embedding_cache_path))
+    dense_store = DenseStore(cache=embedding_cache)
 
     for tenant_id in tenant_ids:
         config = load_tenant_config(tenants_dir / tenant_id / "config.yaml")

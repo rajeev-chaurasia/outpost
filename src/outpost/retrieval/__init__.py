@@ -2,7 +2,13 @@
 
 from outpost.retrieval.build import build_multi_tenant_index
 from outpost.retrieval.chunk import chunk_document
-from outpost.retrieval.dense import DenseStore, EmbeddingCache, NvidiaEmbeddingClient
+from outpost.retrieval.dense import (
+    DenseStore,
+    EmbeddingCache,
+    EmbeddingSource,
+    LiveFallbackEmbeddingCache,
+    NvidiaEmbeddingClient,
+)
 from outpost.retrieval.document import Chunk, Document, Span
 from outpost.retrieval.errors import EmbeddingCacheMissError, RetrievalError
 from outpost.retrieval.hybrid import reciprocal_rank_fusion
@@ -16,6 +22,8 @@ __all__ = [
     "Document",
     "EmbeddingCache",
     "EmbeddingCacheMissError",
+    "EmbeddingSource",
+    "LiveFallbackEmbeddingCache",
     "NvidiaEmbeddingClient",
     "RetrievalError",
     "Span",
