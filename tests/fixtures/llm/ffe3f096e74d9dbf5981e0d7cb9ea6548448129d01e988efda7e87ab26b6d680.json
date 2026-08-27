@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "I\u2019m sorry\u2014I\u2019m not able to flag the discrepancy for you at the moment. If you need this short\u2011payment issue recorded, please let a member of the accounts\u2011receivable team know (or submit a request through your internal workflow) so it can be addressed. Let me know if there\u2019s anything else I can help with!",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 266,
+      "completion_tokens": 150
+    }
+  }
+}

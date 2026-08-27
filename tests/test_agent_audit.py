@@ -28,9 +28,7 @@ def _record(request_id: str = "req-1") -> AuditRecord:
         citations=[
             Citation(
                 assertion="Invoice INV-1001 was paid in full.",
-                span=Span(
-                    source_id="statements", document_id="d1", start=0, end=4, text="paid"
-                ),
+                span=Span(source_id="statements", document_id="d1", start=0, end=4, text="paid"),
             )
         ],
         unsupported_assertions=["some unrelated aside"],

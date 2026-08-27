@@ -1,0 +1,19 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8b67ea41898242f6",
+        "name": "flag_discrepancy",
+        "arguments": {
+          "entity_key": "INV-1005",
+          "reason": "Short paid by $650"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 191,
+      "completion_tokens": 73
+    }
+  }
+}
