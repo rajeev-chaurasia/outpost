@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The deductible for policy\u202fPOL\u2011500 is **$500.00**, and the policyholder is **J.\u202fRivera**.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 671,
+      "completion_tokens": 32
+    }
+  }
+}

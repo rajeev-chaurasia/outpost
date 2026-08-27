@@ -5,23 +5,23 @@
       "cases": 5,
       "leaks": 0,
       "post_filter_results": 0,
-      "traversal_results": 10
+      "traversal_results": 15
     },
     "dealer_ar": {
       "cases": 5,
       "leaks": 0,
-      "post_filter_results": 4,
+      "post_filter_results": 1,
       "traversal_results": 15
     },
     "utility_ops": {
       "cases": 4,
       "leaks": 0,
-      "post_filter_results": 4,
-      "traversal_results": 8
+      "post_filter_results": 1,
+      "traversal_results": 12
     }
   },
-  "post_filter_authorized_results": 8,
+  "post_filter_authorized_results": 2,
   "total_leaks": 0,
-  "traversal_authorized_results": 33,
+  "traversal_authorized_results": 42,
   "zero_leak_invariant_met": true
 }

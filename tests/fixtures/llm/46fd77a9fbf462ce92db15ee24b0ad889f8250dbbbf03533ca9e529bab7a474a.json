@@ -3,7 +3,7 @@
     "content": null,
     "tool_calls": [
       {
-        "id": "chatcmpl-tool-b273ac6b68839617",
+        "id": "chatcmpl-tool-bba79213fc834ae1",
         "name": "search",
         "arguments": {
           "query": "INV-1001"

@@ -3,7 +3,7 @@
     "content": "The service agreement for account\u202fACC\u2011701 specifies a response time of **4\u202fhours**.",
     "tool_calls": [],
     "usage": {
-      "prompt_tokens": 407,
+      "prompt_tokens": 648,
       "completion_tokens": 24
     }
   }
