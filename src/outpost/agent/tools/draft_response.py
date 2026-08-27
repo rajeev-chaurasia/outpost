@@ -1,6 +1,6 @@
 """Write tool: drafts a response for a human to review. Wrap in
-PolicyGatedTool to enforce a tenant's action policy; this tool itself
-only knows how to do the mechanical part.
+ActionGatedTool to enforce which actions a tenant allows; this tool
+itself only knows how to do the mechanical part.
 """
 
 from dataclasses import dataclass

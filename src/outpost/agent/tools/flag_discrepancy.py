@@ -1,6 +1,6 @@
 """Write tool: records a discrepancy against an entity for human
-follow-up. Wrap in PolicyGatedTool to enforce a tenant's action policy;
-this tool itself only knows how to do the mechanical part.
+follow-up. Wrap in ActionGatedTool to enforce which actions a tenant
+allows; this tool itself only knows how to do the mechanical part.
 """
 
 from dataclasses import dataclass

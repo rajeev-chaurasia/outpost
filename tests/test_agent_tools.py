@@ -1,15 +1,15 @@
 """Tool done-tests: read-only tools return usable results, and a write
-tool wrapped in PolicyGatedTool refuses without executing when the
-action is outside the tenant's declared policy, but runs normally when
-it is inside it.
+tool wrapped in ActionGatedTool refuses without executing when the
+action is outside the tenant's allowed actions, but runs normally when
+it is inside them.
 """
 
 import numpy as np
 
 from outpost.agent.tools import (
+    ActionGatedTool,
     FetchEntityTool,
     FlagDiscrepancyTool,
-    PolicyGatedTool,
     SearchTool,
 )
 from outpost.retrieval.dense import DenseStore, EmbeddingCache
@@ -62,19 +62,19 @@ def test_fetch_entity_tool_reports_a_missing_key_without_raising() -> None:
     assert "error" in result
 
 
-def test_policy_gated_tool_declines_action_outside_policy() -> None:
-    gated = PolicyGatedTool(tool=FlagDiscrepancyTool(), allowed_actions=frozenset())
+def test_action_gated_tool_declines_action_outside_allowed_actions() -> None:
+    gated = ActionGatedTool(tool=FlagDiscrepancyTool(), allowed_actions=frozenset())
 
     result = gated.invoke({"entity_key": "W-1", "reason": "short paid"})
 
     assert result == {
         "executed": False,
-        "reason": "flag_discrepancy is not permitted by tenant policy",
+        "reason": "flag_discrepancy is not in the tenant's allowed actions",
     }
 
 
-def test_policy_gated_tool_executes_action_inside_policy() -> None:
-    gated = PolicyGatedTool(
+def test_action_gated_tool_executes_action_inside_allowed_actions() -> None:
+    gated = ActionGatedTool(
         tool=FlagDiscrepancyTool(), allowed_actions=frozenset({"flag_discrepancy"})
     )
 

@@ -1,6 +1,6 @@
 """Read-only and write tools the agent can call."""
 
-from outpost.agent.tools.base import PolicyGatedTool, Tool
+from outpost.agent.tools.base import ActionGatedTool, Tool
 from outpost.agent.tools.draft_response import DraftResponseTool
 from outpost.agent.tools.fetch_entity import FetchEntityTool
 from outpost.agent.tools.flag_discrepancy import FlagDiscrepancyTool
@@ -10,7 +10,7 @@ __all__ = [
     "DraftResponseTool",
     "FetchEntityTool",
     "FlagDiscrepancyTool",
-    "PolicyGatedTool",
+    "ActionGatedTool",
     "SearchTool",
     "Tool",
 ]
