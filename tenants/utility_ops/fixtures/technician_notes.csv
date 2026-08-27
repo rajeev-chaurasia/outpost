@@ -1,0 +1,5 @@
+﻿note_no,wo_id,technician_name,note_date,content,internal_flag
+NOTE-1,WO-3001,R. Alvarez,2026-04-02,Replaced meter and confirmed reading.,false
+NOTE-2,WO-3002,R. Alvarez,22/04/2026,Repaired downed line section.,false
+NOTE-3, WO-3003 ,T. Nguyen,NULL,Awaiting parts for inspection follow-up.,true
+NOTE-4,WO-3004,T. Nguyen,04/05/2026,Flagged for supervisor review due to scheduling conflict.,true

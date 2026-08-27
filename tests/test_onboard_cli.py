@@ -50,10 +50,13 @@ def test_ingesting_two_tenants_keeps_their_chunks_isolated() -> None:
     )
 
     assert dealer_report.tenant_id != claims_report.tenant_id
-    dealer_chunk_tenants = {c.tenant_id for c in dealer_index.chunks.values()}
-    claims_chunk_tenants = {c.tenant_id for c in claims_index.chunks.values()}
-    assert dealer_chunk_tenants <= {"dealer_ar", "claims_intake"}
-    assert claims_chunk_tenants <= {"dealer_ar", "claims_intake"}
+    dealer_chunks = {c.chunk_id for c in dealer_index.chunks.values() if c.tenant_id == "dealer_ar"}
+    claims_chunks = {
+        c.chunk_id for c in claims_index.chunks.values() if c.tenant_id == "claims_intake"
+    }
+    assert dealer_chunks
+    assert claims_chunks
+    assert dealer_chunks.isdisjoint(claims_chunks)
 
 
 def test_mapping_outcome_helpers_are_consistent_with_the_report() -> None:

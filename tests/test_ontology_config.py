@@ -118,6 +118,9 @@ BANNED_WORDS = [
     "dealer",
     "premium",
     "deductible",
+    "work_order",
+    "technician",
+    "agreement",
 ]
 _LEAK_PATTERN = re.compile(r"\b(" + "|".join(BANNED_WORDS) + r")\b", re.IGNORECASE)
 

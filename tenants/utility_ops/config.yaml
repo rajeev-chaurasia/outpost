@@ -1,0 +1,54 @@
+tenant_id: utility_ops
+display_name: Utility Field Operations
+
+ontology:
+  entities:
+    - name: work_order
+      key: work_order_id
+      fields: [work_order_id, account_id, work_type, scheduled_date, completed_date, status]
+    - name: service_agreement
+      key: agreement_id
+      fields: [agreement_id, account_id, service_level, effective_date, expiration_date, response_time_hours]
+    - name: technician_note
+      key: note_id
+      fields: [note_id, work_order_id, technician_name, note_date, content]
+  relations:
+    - name: covered_by
+      from: work_order
+      to: service_agreement
+    - name: annotated_by
+      from: technician_note
+      to: work_order
+
+sources:
+  - id: work_orders
+    connector: csv_export
+    path: fixtures/work_orders.csv
+    entity: work_order
+    field_map:
+      work_order_id: [wo_id, wo_no, "WO #"]
+      completed_date: [date_completed, completed]
+      scheduled_date: [date_scheduled, scheduled]
+  - id: technician_notes
+    connector: csv_export
+    path: fixtures/technician_notes.csv
+    entity: technician_note
+    field_map:
+      note_id: [note_no, id]
+      work_order_id: [wo_id, wo_no]
+  - id: service_agreements
+    connector: pdf_text
+    path: fixtures/service_agreements/
+    entity: null
+
+terminology:
+  discrepancy: "missed service window"
+  account: "service account"
+
+actions:
+  allowed: [flag_discrepancy, draft_response]
+  requires_review: [draft_response]
+
+budget:
+  latency_p99_ms: 8000
+  max_tokens_per_request: 4000

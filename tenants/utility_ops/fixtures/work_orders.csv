@@ -1,0 +1,7 @@
+WO #,account_id,work_type,date_scheduled,date_completed,status,crew_notes
+WO-3001,ACC-701,meter replacement,2026-04-01,2026-04-02,closed,replaced faulty meter
+ WO-3002 ,ACC-702,line repair,2026-04-03,21/04/2026,closed,
+WO-3003,ACC-701,inspection,2026-04-05,NULL,open,
+WO-3004,ACC-703,meter replacement,2026-04-06,05/04/2026,closed,
+WO-3005,ACC-702,line repair,2026-04-10,,open,
+WO-3005,ACC-702,line repair,2026-04-10,2026-04-12,closed,
