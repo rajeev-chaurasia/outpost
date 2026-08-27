@@ -1,0 +1,35 @@
+{
+  "correct_rung_rate": 1.0,
+  "scenarios": {
+    "action_declined": {
+      "actual_rung": "ACTION_DECLINED",
+      "answer": "I could not flag this.",
+      "correct": true,
+      "expected_rung": "ACTION_DECLINED"
+    },
+    "full": {
+      "actual_rung": "FULL",
+      "answer": "Invoice INV-1001 was paid in full on 2026-03-15 via ACH.",
+      "correct": true,
+      "expected_rung": "FULL"
+    },
+    "partial": {
+      "actual_rung": "PARTIAL",
+      "answer": "Invoice INV-1001 was paid in full on 2026-03-15 via ACH. The warranty on this vehicle expires next year.",
+      "correct": true,
+      "expected_rung": "PARTIAL"
+    },
+    "provider_fallback": {
+      "actual_rung": "PROVIDER_FALLBACK",
+      "answer": "Handled by the fallback provider.",
+      "correct": true,
+      "expected_rung": "PROVIDER_FALLBACK"
+    },
+    "refused": {
+      "actual_rung": "REFUSED",
+      "answer": "I could not find enough evidence to answer confidently. I tried: search({'query': 'INV-1001'}).",
+      "correct": true,
+      "expected_rung": "REFUSED"
+    }
+  }
+}
