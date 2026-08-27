@@ -1,0 +1,52 @@
+[project]
+name = "outpost"
+version = "0.1.0"
+description = "Agentic deployment kit that proves it redeploys across customers"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "pydantic>=2.9",
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "numpy>=2.1",
+    "python-dotenv>=1.0",
+    "typer>=0.13",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "types-pyyaml>=6.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/outpost"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src/outpost --cov-report=term-missing"
+
+[tool.coverage.run]
+branch = true
+source = ["src/outpost"]
