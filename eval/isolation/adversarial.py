@@ -8,11 +8,8 @@ from pathlib import Path
 
 import yaml
 
-from outpost.connectors.pdf_text import PdfTextConnector
-from outpost.ontology import load_tenant_config
-from outpost.retrieval.chunk import chunk_document
-from outpost.retrieval.dense import DenseStore, EmbeddingCache
-from outpost.retrieval.document import Document
+from outpost.retrieval.build import build_multi_tenant_index as _build_multi_tenant_index
+from outpost.retrieval.dense import DenseStore
 from outpost.retrieval.isolation import search, search_post_filtered
 from outpost.retrieval.lexical import BM25Index
 
@@ -39,29 +36,7 @@ def load_cases() -> list[IsolationCase]:
 def build_multi_tenant_index(
     cache_path: Path = EMBEDDING_CACHE_PATH,
 ) -> tuple[BM25Index, DenseStore]:
-    lexical_index = BM25Index()
-    dense_store = DenseStore(cache=EmbeddingCache.load(cache_path))
-
-    for tenant_id in TENANT_IDS:
-        config = load_tenant_config(TENANTS_DIR / tenant_id / "config.yaml")
-        for source in config.sources:
-            if source.connector != "pdf_text":
-                continue
-            records = PdfTextConnector(
-                source_id=source.id, path=TENANTS_DIR / tenant_id / source.path
-            ).read()
-            for record in records:
-                document = Document(
-                    document_id=f"{tenant_id}:{record.fields['document_id']}",
-                    source_id=source.id,
-                    tenant_id=tenant_id,
-                    text=record.fields["text"],
-                )
-                for chunk in chunk_document(document):
-                    lexical_index.add(chunk)
-                    dense_store.index_chunk(chunk)
-
-    return lexical_index, dense_store
+    return _build_multi_tenant_index(list(TENANT_IDS), TENANTS_DIR, cache_path)
 
 
 @dataclass(frozen=True)

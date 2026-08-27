@@ -1,5 +1,6 @@
 """Retrieval indexes and tenant isolation."""
 
+from outpost.retrieval.build import build_multi_tenant_index
 from outpost.retrieval.chunk import chunk_document
 from outpost.retrieval.dense import DenseStore, EmbeddingCache, NvidiaEmbeddingClient
 from outpost.retrieval.document import Chunk, Document, Span
@@ -18,6 +19,7 @@ __all__ = [
     "NvidiaEmbeddingClient",
     "RetrievalError",
     "Span",
+    "build_multi_tenant_index",
     "chunk_document",
     "reciprocal_rank_fusion",
     "search",
