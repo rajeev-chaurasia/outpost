@@ -72,15 +72,18 @@ class EmbeddingCache:
 class NvidiaEmbeddingClient:
     """Calls the live NVIDIA embedding endpoint.
 
-    Only used by the local fixture-generation script; test code and CI
-    never construct one.
+    The api key is only read from the environment when embed() actually
+    runs, not at construction: LiveFallbackEmbeddingCache always holds
+    one of these ready in case of a cache miss, and constructing it must
+    not require a key that a fully cache-hit run never ends up needing.
     """
 
     def __init__(self, api_key: str | None = None, model: str = EMBEDDING_MODEL) -> None:
-        self._api_key = api_key or os.environ["LLM_API_KEY"]
+        self._api_key = api_key
         self._model = model
 
     def embed(self, texts: list[str], input_type: InputType) -> list[NDArray[np.float32]]:
+        api_key = self._api_key or os.environ["LLM_API_KEY"]
         response = httpx.post(
             _API_URL,
             json={
@@ -89,7 +92,7 @@ class NvidiaEmbeddingClient:
                 "input_type": input_type,
                 "encoding_format": "float",
             },
-            headers={"Authorization": f"Bearer {self._api_key}"},
+            headers={"Authorization": f"Bearer {api_key}"},
             timeout=60.0,
         )
         response.raise_for_status()
