@@ -1,0 +1,55 @@
+tenant_id: dealer_ar
+display_name: Dealership Accounts Receivable
+
+ontology:
+  entities:
+    - name: invoice
+      key: invoice_number
+      fields: [invoice_number, account_id, amount, issued_date, due_date, status]
+    - name: payment
+      key: payment_id
+      fields: [payment_id, invoice_number, amount, received_date, method]
+    - name: account
+      key: account_id
+      fields: [account_id, name, terms, credit_limit]
+  relations:
+    - name: settles
+      from: payment
+      to: invoice
+    - name: billed_to
+      from: invoice
+      to: account
+
+sources:
+  - id: invoices
+    connector: csv_export
+    path: fixtures/invoices.csv
+    entity: invoice
+    field_map:
+      invoice_number: [inv_no, invoice_num, "Invoice #"]
+      amount: [amt, total, "Amount Due"]
+      issued_date: [date, issued, "Invoice Date"]
+  - id: payments
+    connector: csv_export
+    path: fixtures/payments.csv
+    entity: payment
+    field_map:
+      payment_id: [pay_id, payment_no]
+      invoice_number: [inv_no, invoice_num]
+      received_date: [date, received]
+  - id: statements
+    connector: pdf_text
+    path: fixtures/statements/
+    entity: null
+
+terminology:
+  discrepancy: "short payment"
+  account: "dealer account"
+
+actions:
+  allowed: [flag_discrepancy, draft_response]
+  requires_review: [draft_response]
+
+budget:
+  latency_p99_ms: 8000
+  max_tokens_per_request: 4000
