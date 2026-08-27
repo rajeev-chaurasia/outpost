@@ -50,3 +50,23 @@ def test_empty_answer_produces_no_claims_at_all() -> None:
     assert result.citations == []
     assert result.unsupported_assertions == []
     assert result.unsupported_rate == 0.0
+
+
+def test_decimal_point_does_not_split_the_sentence() -> None:
+    evidence = [_span("the deductible is $500.00 on this policy")]
+    answer = "The deductible is $500.00 on this policy."
+    result = ground_answer(answer, evidence)
+
+    assert result.unsupported_assertions == []
+    assert len(result.citations) == 1
+    assert result.citations[0].assertion == answer
+
+
+def test_name_initial_does_not_split_the_sentence() -> None:
+    evidence = [_span("the policyholder is J. Rivera on this policy")]
+    answer = "The policyholder is J. Rivera on this policy."
+    result = ground_answer(answer, evidence)
+
+    assert result.unsupported_assertions == []
+    assert len(result.citations) == 1
+    assert result.citations[0].assertion == answer

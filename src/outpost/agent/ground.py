@@ -16,6 +16,48 @@ from outpost.retrieval.document import Span
 
 _SENTENCE_RE = re.compile(r"[^.!?]+[.!?]?")
 _WORD_RE = re.compile(r"[a-z0-9]+")
+# Two non-terminal uses of "." get mistaken for sentence endings by the
+# naive splitter below: a decimal point ($500.00 must not split into
+# "$500." and "00") and a name initial (J. Rivera must not split into
+# "J." and "Rivera"). Both get protected with a placeholder unlikely to
+# appear in real text, then restored after splitting.
+_DECIMAL_POINT_RE = re.compile(r"(?<=\d)\.(?=\d)")
+_INITIAL_RE = re.compile(r"(?<![A-Za-z])([A-Z])\.(?=\s+[A-Z])")
+_PLACEHOLDER = "\x00"
+
+# Filler words that pad the overlap ratio without asserting anything a
+# source could support or contradict. Filtered from both sides so a
+# clause with a lot of "the"s and "is"es is not scored on those matching
+# trivially, and so it is not diluted by them not matching either.
+_STOPWORDS = frozenset(
+    {
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "been",
+        "but",
+        "by",
+        "for",
+        "in",
+        "is",
+        "it",
+        "its",
+        "of",
+        "on",
+        "or",
+        "that",
+        "the",
+        "this",
+        "to",
+        "was",
+        "were",
+        "with",
+    }
+)
 
 
 class Citation(BaseModel):
@@ -39,13 +81,22 @@ class GroundingResult:
 
 
 def _tokens(text: str) -> set[str]:
-    return set(_WORD_RE.findall(text.lower()))
+    return set(_WORD_RE.findall(text.lower())) - _STOPWORDS
 
 
 def _overlap_ratio(assertion_tokens: set[str], span_tokens: set[str]) -> float:
     if not assertion_tokens:
         return 0.0
     return len(assertion_tokens & span_tokens) / len(assertion_tokens)
+
+
+def _split_sentences(answer: str) -> list[str]:
+    protected = _DECIMAL_POINT_RE.sub(_PLACEHOLDER, answer)
+    protected = _INITIAL_RE.sub(lambda match: match.group(1) + _PLACEHOLDER, protected)
+    return [
+        raw_sentence.replace(_PLACEHOLDER, ".").strip()
+        for raw_sentence in _SENTENCE_RE.findall(protected)
+    ]
 
 
 def ground_answer(
@@ -58,8 +109,7 @@ def ground_answer(
     citations: list[Citation] = []
     unsupported: list[str] = []
 
-    for raw_sentence in _SENTENCE_RE.findall(answer):
-        sentence = raw_sentence.strip()
+    for sentence in _split_sentences(answer):
         if not sentence:
             continue
 
