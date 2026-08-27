@@ -19,6 +19,7 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(REPO_ROOT / ".env")
 
+from eval.grounding.scenarios import SCENARIOS, GroundingScenario  # noqa: E402
 from eval.isolation.adversarial import EMBEDDING_CACHE_PATH, build_multi_tenant_index  # noqa: E402
 from outpost.agent.plan import PlanResult  # noqa: E402
 from outpost.agent.plan import run as run_plan  # noqa: E402
@@ -28,6 +29,7 @@ from outpost.llm.openai_compatible import OpenAICompatibleProvider  # noqa: E402
 from outpost.llm.recorded import request_key  # noqa: E402
 from outpost.retrieval.dense import DenseStore, NvidiaEmbeddingClient  # noqa: E402
 from outpost.retrieval.errors import EmbeddingCacheMissError  # noqa: E402
+from outpost.retrieval.lexical import BM25Index  # noqa: E402
 
 FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "llm"
 MODEL = "openai/gpt-oss-120b"
@@ -86,62 +88,44 @@ class RecordingProvider:
         return completion
 
 
-def record_search_then_answer() -> None:
-    lexical_index, dense_store = build_multi_tenant_index()
+def _record_one_scenario(
+    scenario: GroundingScenario,
+    lexical_index: BM25Index,
+    dense_store: DenseStore,
+    embedding_client: NvidiaEmbeddingClient,
+) -> None:
     search_tool = SearchTool(
-        lexical_index=lexical_index, dense_store=dense_store, tenant_id="dealer_ar"
+        lexical_index=lexical_index, dense_store=dense_store, tenant_id=scenario.tenant_id
     )
     provider = RecordingProvider(
-        inner=OpenAICompatibleProvider(model=MODEL, timeout_seconds=90.0), fixtures_dir=FIXTURES_DIR
+        inner=OpenAICompatibleProvider(model=MODEL, timeout_seconds=90.0),
+        fixtures_dir=FIXTURES_DIR,
     )
-    embedding_client = NvidiaEmbeddingClient()
 
-    result = _run_filling_embedding_gaps(
-        lambda: run_plan(
+    def run_once() -> PlanResult:
+        return run_plan(
             provider,
             {"search": search_tool},
-            system_prompt=(
-                "You are a helpful assistant for a dealership accounts receivable team. "
-                "Use the search tool to find relevant statement text before answering. "
-                "Answer only using information the search tool returns, in one or two "
-                "short sentences."
-            ),
-            user_request="According to the account statements, was invoice INV-1001 paid, and how?",
-        ),
-        dense_store,
-        embedding_client,
-    )
-    print("search_then_answer steps:", result.steps)
-    print("search_then_answer final_content:", result.final_content)
+            system_prompt=scenario.system_prompt,
+            user_request=scenario.user_request,
+        )
+
+    result = _run_filling_embedding_gaps(run_once, dense_store, embedding_client)
+    print(f"[{scenario.tenant_id}] steps:", result.steps)
+    print(f"[{scenario.tenant_id}] final_content:", result.final_content)
 
 
-def record_claims_intake_search_then_answer() -> None:
+def record_grounding_scenarios() -> None:
+    """Records one search-then-answer turn per tenant from
+    eval.grounding.scenarios, the same source eval/grounding/score.py
+    reads, so a fixture is always generated for the exact wording that
+    will later be replayed.
+    """
     lexical_index, dense_store = build_multi_tenant_index()
-    search_tool = SearchTool(
-        lexical_index=lexical_index, dense_store=dense_store, tenant_id="claims_intake"
-    )
-    provider = RecordingProvider(
-        inner=OpenAICompatibleProvider(model=MODEL, timeout_seconds=90.0), fixtures_dir=FIXTURES_DIR
-    )
     embedding_client = NvidiaEmbeddingClient()
 
-    result = _run_filling_embedding_gaps(
-        lambda: run_plan(
-            provider,
-            {"search": search_tool},
-            system_prompt=(
-                "You are a helpful assistant for an insurance claims intake team. "
-                "Use the search tool to find relevant policy text before answering. "
-                "Answer only using information the search tool returns, in one or two "
-                "short sentences."
-            ),
-            user_request="What is the deductible on policy POL-500, and who is the policyholder?",
-        ),
-        dense_store,
-        embedding_client,
-    )
-    print("claims_intake_search_then_answer steps:", result.steps)
-    print("claims_intake_search_then_answer final_content:", result.final_content)
+    for scenario in SCENARIOS:
+        _record_one_scenario(scenario, lexical_index, dense_store, embedding_client)
 
 
 def record_declined_write_action() -> None:
@@ -165,6 +149,5 @@ def record_declined_write_action() -> None:
 
 
 if __name__ == "__main__":
-    record_search_then_answer()
-    record_claims_intake_search_then_answer()
+    record_grounding_scenarios()
     record_declined_write_action()

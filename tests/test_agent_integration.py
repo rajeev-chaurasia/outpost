@@ -7,6 +7,7 @@ replay committed fixtures; neither touches the network.
 
 from pathlib import Path
 
+from eval.grounding.scenarios import SCENARIOS
 from outpost.agent.audit import AuditLog
 from outpost.agent.handle import handle_request
 from outpost.agent.tools import ActionGatedTool, FlagDiscrepancyTool, SearchTool
@@ -19,13 +20,7 @@ TENANTS_DIR = REPO_ROOT / "tenants"
 LLM_FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "llm"
 EMBEDDING_CACHE_PATH = REPO_ROOT / "tests" / "fixtures" / "embeddings" / "retrieval.npz"
 
-SYSTEM_PROMPT = (
-    "You are a helpful assistant for a dealership accounts receivable team. "
-    "Use the search tool to find relevant statement text before answering. "
-    "Answer only using information the search tool returns, in one or two "
-    "short sentences."
-)
-USER_REQUEST = "According to the account statements, was invoice INV-1001 paid, and how?"
+DEALER_AR_SCENARIO = next(s for s in SCENARIOS if s.tenant_id == "dealer_ar")
 
 
 def _dealer_ar_index() -> tuple[BM25Index, DenseStore]:
@@ -47,8 +42,8 @@ def test_real_model_search_answer_grounds_with_real_citations(tmp_path: Path) ->
         {"search": search_tool},
         audit_log,
         tenant_id="dealer_ar",
-        system_prompt=SYSTEM_PROMPT,
-        user_request=USER_REQUEST,
+        system_prompt=DEALER_AR_SCENARIO.system_prompt,
+        user_request=DEALER_AR_SCENARIO.user_request,
     )
 
     assert result.plan.steps[0].tool_name == "search"

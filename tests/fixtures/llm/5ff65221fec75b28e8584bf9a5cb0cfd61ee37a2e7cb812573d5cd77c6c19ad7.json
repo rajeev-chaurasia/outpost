@@ -3,7 +3,7 @@
     "content": null,
     "tool_calls": [
       {
-        "id": "chatcmpl-tool-8d1980b3d4fd6e12",
+        "id": "chatcmpl-tool-9998d73411081ee6",
         "name": "flag_discrepancy",
         "arguments": {
           "entity_key": "INV-1005",

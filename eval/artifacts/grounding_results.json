@@ -1,6 +1,6 @@
 {
   "claims_intake": {
-    "answer": "The deductible for policy\u202fPOL\u2011500 is **$500.00**, and the policyholder is **J.\u202fRivera**.",
+    "answer": "The deductible for policy\u202fPOL\u2011500 is $500.00, and the policyholder is J.\u202fRivera.",
     "citation_count": 1,
     "request": "What is the deductible on policy POL-500, and who is the policyholder?",
     "unsupported_assertions": [],
@@ -8,8 +8,8 @@
     "unsupported_rate": 0.0
   },
   "dealer_ar": {
-    "answer": "Yes\u2014invoice\u202fINV\u20111001 was paid in full. A payment (PAY\u20111) of $1,240.00 was received on\u202f2026\u201103\u201115 via ACH.",
-    "citation_count": 2,
+    "answer": "Invoice\u202fINV\u20111001 was paid in full with payment\u202fPAY\u20111 on\u202f2026\u201103\u201115 via ACH.",
+    "citation_count": 1,
     "request": "According to the account statements, was invoice INV-1001 paid, and how?",
     "unsupported_assertions": [],
     "unsupported_count": 0,
