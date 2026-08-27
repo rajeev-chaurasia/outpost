@@ -3,16 +3,16 @@
     "content": null,
     "tool_calls": [
       {
-        "id": "chatcmpl-tool-b273ac6b68839617",
+        "id": "chatcmpl-tool-ba16e80e7bef8897",
         "name": "search",
         "arguments": {
-          "query": "INV-1001"
+          "query": "ACC-701 service agreement response time"
         }
       }
     ],
     "usage": {
-      "prompt_tokens": 187,
-      "completion_tokens": 40
+      "prompt_tokens": 188,
+      "completion_tokens": 49
     }
   }
 }

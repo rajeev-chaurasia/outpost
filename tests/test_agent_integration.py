@@ -21,12 +21,21 @@ LLM_FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "llm"
 EMBEDDING_CACHE_PATH = REPO_ROOT / "tests" / "fixtures" / "embeddings" / "retrieval.npz"
 
 DEALER_AR_SCENARIO = next(s for s in SCENARIOS if s.tenant_id == "dealer_ar")
+UTILITY_OPS_SCENARIO = next(s for s in SCENARIOS if s.tenant_id == "utility_ops")
+
+
+def _shared_index() -> tuple[BM25Index, DenseStore]:
+    from outpost.ontology import discover_tenant_ids
+    from outpost.retrieval.build import build_multi_tenant_index
+    from outpost.retrieval.dense import EmbeddingCache
+
+    return build_multi_tenant_index(
+        discover_tenant_ids(TENANTS_DIR), TENANTS_DIR, EmbeddingCache.load(EMBEDDING_CACHE_PATH)
+    )
 
 
 def _dealer_ar_index() -> tuple[BM25Index, DenseStore]:
-    from eval.isolation.adversarial import build_multi_tenant_index
-
-    return build_multi_tenant_index(EMBEDDING_CACHE_PATH)
+    return _shared_index()
 
 
 def test_real_model_search_answer_grounds_with_real_citations(tmp_path: Path) -> None:
@@ -83,3 +92,47 @@ def test_real_model_declined_write_action_is_refused_and_audited(tmp_path: Path)
     assert stored is not None
     assert stored.steps[0].result["executed"] is False
     assert "not in the tenant's allowed actions" in stored.steps[0].result["reason"]
+
+
+def test_real_model_search_answer_grounds_utility_ops_with_real_citations(tmp_path: Path) -> None:
+    """The third tenant, onboarded cold in phase 8, grounds exactly the
+    same way the first two do: same code path, different vocabulary.
+    """
+    lexical_index, dense_store = _shared_index()
+    search_tool = SearchTool(
+        lexical_index=lexical_index, dense_store=dense_store, tenant_id="utility_ops"
+    )
+    provider = RecordedProvider(fixtures_dir=LLM_FIXTURES_DIR, model="openai/gpt-oss-120b")
+    audit_log = AuditLog(tmp_path / "audit.sqlite")
+
+    result = handle_request(
+        provider,
+        {"search": search_tool},
+        audit_log,
+        tenant_id="utility_ops",
+        system_prompt=UTILITY_OPS_SCENARIO.system_prompt,
+        user_request=UTILITY_OPS_SCENARIO.user_request,
+    )
+
+    assert result.plan.steps[0].tool_name == "search"
+    assert result.grounding.citations
+    assert not result.grounding.unsupported_assertions
+    for citation in result.grounding.citations:
+        assert citation.span.text
+        assert citation.span.source_id == "service_agreements"
+        assert citation.span.document_id.startswith("utility_ops:")
+
+
+def test_utility_ops_search_never_returns_another_tenants_chunk() -> None:
+    lexical_index, dense_store = _shared_index()
+    search_tool = SearchTool(
+        lexical_index=lexical_index, dense_store=dense_store, tenant_id="utility_ops"
+    )
+
+    # The exact query the live model chose when this fixture was recorded
+    # (see the "utility_ops" fixture's tool call); embedding it requires
+    # no live call since it is already in the committed cache.
+    results = search_tool.invoke({"query": "ACC-701 service agreement response time"})
+
+    assert results
+    assert all(span["document_id"].startswith("utility_ops:") for span in results)

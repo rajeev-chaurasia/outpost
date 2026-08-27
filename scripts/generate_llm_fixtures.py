@@ -20,20 +20,29 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(REPO_ROOT / ".env")
 
 from eval.grounding.scenarios import SCENARIOS, GroundingScenario  # noqa: E402
-from eval.isolation.adversarial import EMBEDDING_CACHE_PATH, build_multi_tenant_index  # noqa: E402
 from outpost.agent.plan import PlanResult  # noqa: E402
 from outpost.agent.plan import run as run_plan  # noqa: E402
 from outpost.agent.tools import ActionGatedTool, FlagDiscrepancyTool, SearchTool  # noqa: E402
 from outpost.llm.base import Completion, Message, ToolSpec  # noqa: E402
 from outpost.llm.openai_compatible import OpenAICompatibleProvider  # noqa: E402
 from outpost.llm.recorded import request_key  # noqa: E402
-from outpost.retrieval.dense import DenseStore, NvidiaEmbeddingClient  # noqa: E402
+from outpost.ontology import discover_tenant_ids  # noqa: E402
+from outpost.retrieval.build import build_multi_tenant_index  # noqa: E402
+from outpost.retrieval.dense import DenseStore, EmbeddingCache, NvidiaEmbeddingClient  # noqa: E402
 from outpost.retrieval.errors import EmbeddingCacheMissError  # noqa: E402
 from outpost.retrieval.lexical import BM25Index  # noqa: E402
 
+TENANTS_DIR = REPO_ROOT / "tenants"
 FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "llm"
+EMBEDDING_CACHE_PATH = REPO_ROOT / "tests" / "fixtures" / "embeddings" / "retrieval.npz"
 MODEL = "openai/gpt-oss-120b"
 FALLBACK_MODEL = "openai/gpt-oss-20b"
+
+
+def _build_index() -> tuple[BM25Index, DenseStore]:
+    return build_multi_tenant_index(
+        discover_tenant_ids(TENANTS_DIR), TENANTS_DIR, EmbeddingCache.load(EMBEDDING_CACHE_PATH)
+    )
 
 
 def _run_filling_embedding_gaps(
@@ -123,7 +132,7 @@ def record_grounding_scenarios() -> None:
     reads, so a fixture is always generated for the exact wording that
     will later be replayed.
     """
-    lexical_index, dense_store = build_multi_tenant_index()
+    lexical_index, dense_store = _build_index()
     embedding_client = NvidiaEmbeddingClient()
 
     for scenario in SCENARIOS:
@@ -137,7 +146,7 @@ def record_dealer_ar_with_fallback_model() -> None:
     model string, and gpt-oss-20b answers it the same way gpt-oss-120b
     does, structurally.
     """
-    lexical_index, dense_store = build_multi_tenant_index()
+    lexical_index, dense_store = _build_index()
     embedding_client = NvidiaEmbeddingClient()
     dealer_ar_scenario = next(s for s in SCENARIOS if s.tenant_id == "dealer_ar")
     _record_one_scenario(

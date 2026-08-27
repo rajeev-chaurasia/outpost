@@ -1,10 +1,10 @@
 {
   "response": {
-    "content": "The deductible for policy\u202fPOL\u2011500 is $500.00, and the policyholder is J.\u202fRivera.",
+    "content": "The deductible for policy\u202fPOL\u2011500 is\u202f$500.00, and the policyholder is\u202fJ.\u202fRivera.",
     "tool_calls": [],
     "usage": {
       "prompt_tokens": 419,
-      "completion_tokens": 29
+      "completion_tokens": 94
     }
   }
 }

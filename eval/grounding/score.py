@@ -11,20 +11,26 @@ from pathlib import Path
 from typing import Any
 
 from eval.grounding.scenarios import SCENARIOS
-from eval.isolation.adversarial import EMBEDDING_CACHE_PATH, build_multi_tenant_index
 from outpost.agent.audit import AuditLog
 from outpost.agent.handle import handle_request
 from outpost.agent.tools import SearchTool
 from outpost.llm.recorded import RecordedProvider
+from outpost.ontology import discover_tenant_ids
+from outpost.retrieval.build import build_multi_tenant_index
+from outpost.retrieval.dense import EmbeddingCache
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+TENANTS_DIR = REPO_ROOT / "tenants"
 LLM_FIXTURES_DIR = REPO_ROOT / "tests" / "fixtures" / "llm"
+EMBEDDING_CACHE_PATH = REPO_ROOT / "tests" / "fixtures" / "embeddings" / "retrieval.npz"
 ARTIFACT_PATH = REPO_ROOT / "eval" / "artifacts" / "grounding_results.json"
 MODEL = "openai/gpt-oss-120b"
 
 
 def score(db_path: Path) -> dict[str, dict[str, Any]]:
-    lexical_index, dense_store = build_multi_tenant_index(EMBEDDING_CACHE_PATH)
+    lexical_index, dense_store = build_multi_tenant_index(
+        discover_tenant_ids(TENANTS_DIR), TENANTS_DIR, EmbeddingCache.load(EMBEDDING_CACHE_PATH)
+    )
     provider = RecordedProvider(fixtures_dir=LLM_FIXTURES_DIR, model=MODEL)
     audit_log = AuditLog(db_path)
 
