@@ -78,23 +78,30 @@ the more of the window a post-filter throws away.
 
 ### Grounding
 
-Reported per tenant, never pooled, so a weak tenant cannot hide behind a strong one.
+21 questions across three tenants: 15 the corpus can answer, and 6 it cannot. Two rates,
+because either alone is easy to game. Refusing everything scores a perfect refusal rate;
+answering only the easy questions scores a perfect unsupported rate.
 
-| Tenant | Citations | Unsupported sentences | Unsupported rate |
-| :--- | :---: | :---: | :---: |
-| `dealer_ar` | 1 | 0 | 0.0 percent |
-| `claims_intake` | 1 | 0 | 0.0 percent |
-| `utility_ops` | 1 | 0 | 0.0 percent |
+| Tenant | Answerable | Assertions scored | Unsupported | Refusals correct |
+| :--- | :---: | :---: | :---: | :---: |
+| `dealer_ar` | 5 | 5 | 0 | 2 of 2 |
+| `claims_intake` | 5 | 5 | 0 | 2 of 2 |
+| `utility_ops` | 5 | 5 | 0 | 2 of 2 |
+| **Total** | **15** | **15** | **0 (0.0 percent)** | **6 of 6 (100 percent)** |
+
+Neither direction of error occurred: no answerable question was refused, and no unanswerable
+question was answered.
 
 Artifact: [`eval/artifacts/grounding_results.json`](eval/artifacts/grounding_results.json)
 
 Each answer replays a real recorded `gpt-oss-120b` response, not a hand-written fake. Every
 sentence is matched against the retrieved spans; anything that clears the overlap threshold
 gets a citation, anything that does not is counted as unsupported rather than quietly
-accepted.
+accepted. Reported per tenant, never pooled, so a weak tenant cannot hide behind a strong
+one.
 
-One citation per tenant is a small denominator, so on its own it cannot separate grounding
-working from the threshold happening to fire. The next table is what tests that.
+An unsupported rate says nothing about whether a citation is deserved, only about whether
+one was found. The next table tests that separately.
 
 ### Does a citation mean the source supports the sentence?
 
@@ -187,6 +194,13 @@ endpoint, so the provider abstraction is proven across models rather than across
 `RecordedProvider` is a third implementation of the same protocol with no HTTP at all, and
 a test verifies that swapping models is a config change. Genuine vendor diversity would be
 a stronger claim.
+
+**The contradiction guards initially broke list answers.** Requiring the cited span to
+contain every number in the sentence refused any answer drawing on several records, which
+cost 3 of 15 answerable questions, one per tenant, all list-style. Fabricated values are now
+judged against all retrieved evidence while negation stays per-span. This only surfaced
+because the question set was large enough to contain list questions; it was invisible at one
+question per tenant.
 
 **Exhaustive questions are answered from top-k, not a full scan.** "Which ones" and "how
 many" questions retrieve the top matches rather than every matching record, so a tenant
