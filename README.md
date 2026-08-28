@@ -366,7 +366,7 @@ Beyond the null results above:
 
 ## Verification
 
-135 tests, 94 percent branch coverage, `mypy --strict` clean across 70 files, and every
+145 tests, 94 percent branch coverage, `mypy --strict` clean across 71 files, and every
 published number recomputed from its artifact on each CI run.
 
 ```
