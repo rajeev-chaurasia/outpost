@@ -93,6 +93,30 @@ sentence is matched against the retrieved spans; anything that clears the overla
 gets a citation, anything that does not is counted as unsupported rather than quietly
 accepted.
 
+One citation per tenant is a small denominator, so on its own it cannot separate grounding
+working from the threshold happening to fire. The next table is what tests that.
+
+### Does a citation mean the source supports the sentence?
+
+12 cases pairing a real source with four kinds of sentence. The adversarial ones borrow
+almost all of the source's vocabulary while changing what it says, which is precisely what
+token overlap cannot see.
+
+| Case type | Cases | Cited | Correct |
+| :--- | :---: | :---: | :---: |
+| Faithful restatement | 3 | 3 | **3** |
+| Negation inverted | 3 | 0 | **3** |
+| Value substituted | 3 | 0 | **3** |
+| Unrelated subject | 3 | 0 | **3** |
+
+False citations on adversarial cases: **0 of 6**.
+Artifact: [`eval/artifacts/entailment_results.json`](eval/artifacts/entailment_results.json)
+
+Overlap alone failed this badly: negation-inverted claims were cited 3 of 3, and 5 of the 6
+adversarial cases were wrongly cited. Grounding now rejects a span whose negation cues or
+numeric values disagree with the sentence. Faithful restatements are still cited 3 of 3, so
+the improvement is not bought by refusing everything.
+
 ### The failure ladder
 
 Five behaviors, each forced by a scenario built to trigger exactly that rung.
@@ -169,9 +193,13 @@ many" questions retrieve the top matches rather than every matching record, so a
 with hundreds of matching rows could receive a confidently incomplete list. Answering those
 correctly needs an aggregation path over the mapped records rather than retrieval.
 
-**Grounding is lexical overlap, not entailment.** A sentence that reuses a source's
-vocabulary while inverting its meaning would still be cited. Catching that needs an
-entailment model.
+**Grounding is guarded overlap, still not entailment.** Negation and substituted values are
+checked explicitly, which covers the two ways a borrowed sentence usually inverts its
+source and takes the measured false-citation rate to zero on the current adversarial set.
+Neither check reasons about meaning. A sentence that contradicts its source through word
+choice alone, with no negation cue and no changed number, would still be cited. Catching
+that needs an entailment model, and the adversarial set is 12 cases, small enough that it
+should be read as a regression gate rather than a general guarantee.
 
 **Dense retrieval is weak on exact identifiers.** Invoice numbers, claim numbers, and work
 order ids are matched by BM25, not by embedding similarity. Hybrid fusion covers this, but
