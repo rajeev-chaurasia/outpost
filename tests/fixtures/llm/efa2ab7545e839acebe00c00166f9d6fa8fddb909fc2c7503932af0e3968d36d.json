@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-baeaae294c8b9877",
+        "name": "search",
+        "arguments": {
+          "query": "February salesperson closed deals"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 2435,
+      "completion_tokens": 96
+    }
+  }
+}

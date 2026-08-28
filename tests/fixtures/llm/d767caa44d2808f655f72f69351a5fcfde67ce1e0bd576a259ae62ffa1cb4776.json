@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-bc5318a23916507e",
+        "name": "search",
+        "arguments": {
+          "query": "crew certification"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1538,
+      "completion_tokens": 57
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-9d09051d30293d14",
+        "name": "search",
+        "arguments": {
+          "query": "crew members"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 2018,
+      "completion_tokens": 52
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-a0a4bcf79a29be4d",
+        "name": "search",
+        "arguments": {
+          "query": "average claim settlement time"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1093,
+      "completion_tokens": 72
+    }
+  }
+}

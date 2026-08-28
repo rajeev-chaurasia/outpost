@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-85027bfa0422633e",
+        "name": "search",
+        "arguments": {
+          "query": "CLM-2001 claim requested amount"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 184,
+      "completion_tokens": 56
+    }
+  }
+}

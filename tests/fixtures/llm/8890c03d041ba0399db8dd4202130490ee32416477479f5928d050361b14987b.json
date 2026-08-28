@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-88d534d64c15ab87",
+        "name": "search",
+        "arguments": {
+          "query": "ACC-1 late fee"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 189,
+      "completion_tokens": 40
+    }
+  }
+}

@@ -1,26 +1,50 @@
 {
-  "claims_intake": {
-    "answer": "The deductible for policy\u202fPOL\u2011500 is **$500.00**, and the policyholder is **J.\u202fRivera**.",
-    "citation_count": 1,
-    "request": "What is the deductible on policy POL-500, and who is the policyholder?",
-    "unsupported_assertions": [],
-    "unsupported_count": 0,
-    "unsupported_rate": 0.0
+  "per_tenant": {
+    "claims_intake": {
+      "answerable_questions": 5,
+      "answered_when_it_should_have_refused": [],
+      "assertions_scored": 5,
+      "citations": 5,
+      "correct_refusal_rate": 1.0,
+      "correct_refusals": 2,
+      "refusable_questions": 2,
+      "refused_when_it_should_have_answered": [],
+      "unsupported": 0,
+      "unsupported_rate": 0.0
+    },
+    "dealer_ar": {
+      "answerable_questions": 5,
+      "answered_when_it_should_have_refused": [],
+      "assertions_scored": 5,
+      "citations": 5,
+      "correct_refusal_rate": 1.0,
+      "correct_refusals": 2,
+      "refusable_questions": 2,
+      "refused_when_it_should_have_answered": [],
+      "unsupported": 0,
+      "unsupported_rate": 0.0
+    },
+    "utility_ops": {
+      "answerable_questions": 5,
+      "answered_when_it_should_have_refused": [],
+      "assertions_scored": 5,
+      "citations": 5,
+      "correct_refusal_rate": 1.0,
+      "correct_refusals": 2,
+      "refusable_questions": 2,
+      "refused_when_it_should_have_answered": [],
+      "unsupported": 0,
+      "unsupported_rate": 0.0
+    }
   },
-  "dealer_ar": {
-    "answer": "Yes\u2014invoice\u202fINV\u20111001 was paid in full, with a $1,240.00 ACH payment received on\u202f2026\u201103\u201115.",
-    "citation_count": 1,
-    "request": "According to the account statements, was invoice INV-1001 paid, and how?",
-    "unsupported_assertions": [],
-    "unsupported_count": 0,
-    "unsupported_rate": 0.0
-  },
-  "utility_ops": {
-    "answer": "The service agreement for account\u202fACC\u2011701 specifies a response time of **4\u202fhours**.",
-    "citation_count": 1,
-    "request": "What is the response time on the service agreement for account ACC-701?",
-    "unsupported_assertions": [],
-    "unsupported_count": 0,
+  "totals": {
+    "assertions_scored": 15,
+    "citations": 15,
+    "correct_refusal_rate": 1.0,
+    "correct_refusals": 6,
+    "questions": 21,
+    "refusable_questions": 6,
+    "unsupported": 0,
     "unsupported_rate": 0.0
   }
 }

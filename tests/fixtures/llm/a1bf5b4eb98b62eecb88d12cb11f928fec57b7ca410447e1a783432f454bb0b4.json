@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The due date on invoice\u202fINV\u20111006 is\u202f2026\u201104\u201129.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 702,
+      "completion_tokens": 23
+    }
+  }
+}

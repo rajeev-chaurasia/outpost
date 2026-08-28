@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The SA\u2011900 agreement provides a **Priority** service level.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 649,
+      "completion_tokens": 17
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "Payments made by check are PAY-2 (for invoice\u202fINV-1002) and PAY-5 (for invoice\u202fINV-1006).",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 616,
+      "completion_tokens": 34
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The available records do not include any February data or salesperson\u2011by\u2011deal information, so I can\u2019t determine which salesperson closed the most deals in February.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 3010,
+      "completion_tokens": 105
+    }
+  }
+}

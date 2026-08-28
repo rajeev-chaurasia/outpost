@@ -1,0 +1,80 @@
+# End-to-end grounding questions, run through the real agent against the
+# real index and scored on how many of the answer's sentences a retrieved
+# span actually supports.
+#
+# answerable  the corpus contains the answer          -> expect a grounded answer
+# refusable   the corpus does not contain the answer  -> expect a refusal
+#
+# The refusable cases are the ones that keep the unsupported rate honest.
+# A grounder can score zero unsupported by answering only easy questions;
+# it cannot also refuse correctly unless it knows when it has no evidence.
+
+cases:
+  # ---------------- dealer_ar ----------------
+  - tenant_id: dealer_ar
+    kind: answerable
+    question: "According to the account statements, was invoice INV-1001 paid, and how?"
+  - tenant_id: dealer_ar
+    kind: answerable
+    question: "What late fee was applied to account ACC-1, and on what date?"
+  - tenant_id: dealer_ar
+    kind: answerable
+    question: "What is the remaining balance on account ACC-1?"
+  - tenant_id: dealer_ar
+    kind: answerable
+    question: "Which payments were made by check?"
+  - tenant_id: dealer_ar
+    kind: answerable
+    question: "What is the due date on invoice INV-1006?"
+  - tenant_id: dealer_ar
+    kind: refusable
+    question: "What is the dealership's employee headcount this quarter?"
+  - tenant_id: dealer_ar
+    kind: refusable
+    question: "Which salesperson closed the most deals in February?"
+
+  # ---------------- claims_intake ----------------
+  - tenant_id: claims_intake
+    kind: answerable
+    question: "What is the deductible on policy POL-500, and who is the policyholder?"
+  - tenant_id: claims_intake
+    kind: answerable
+    question: "What coverage type does policy POL-500 provide?"
+  - tenant_id: claims_intake
+    kind: answerable
+    question: "When does policy POL-500 expire?"
+  - tenant_id: claims_intake
+    kind: answerable
+    question: "How much was requested on claim CLM-2001?"
+  - tenant_id: claims_intake
+    kind: answerable
+    question: "Which claims are associated with policy POL-501?"
+  - tenant_id: claims_intake
+    kind: refusable
+    question: "What is the average claim settlement time across the industry?"
+  - tenant_id: claims_intake
+    kind: refusable
+    question: "Has claim CLM-2001 been approved by the reinsurance carrier?"
+
+  # ---------------- utility_ops ----------------
+  - tenant_id: utility_ops
+    kind: answerable
+    question: "What is the response time on the service agreement for account ACC-701?"
+  - tenant_id: utility_ops
+    kind: answerable
+    question: "What service level does agreement SA-900 provide?"
+  - tenant_id: utility_ops
+    kind: answerable
+    question: "Which work orders are still open?"
+  - tenant_id: utility_ops
+    kind: answerable
+    question: "What work type was scheduled for work order WO-3001?"
+  - tenant_id: utility_ops
+    kind: answerable
+    question: "Which technician wrote the note about replacing a meter?"
+  - tenant_id: utility_ops
+    kind: refusable
+    question: "What is the current spot price of copper wire?"
+  - tenant_id: utility_ops
+    kind: refusable
+    question: "How many crew members are certified for high voltage work?"

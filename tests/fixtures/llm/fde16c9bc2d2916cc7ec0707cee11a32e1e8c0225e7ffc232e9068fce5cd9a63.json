@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "Policy\u202fPOL\u2011500 provides Comprehensive Auto coverage.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 685,
+      "completion_tokens": 14
+    }
+  }
+}

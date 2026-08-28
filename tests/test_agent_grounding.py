@@ -120,3 +120,32 @@ def test_currency_formatting_does_not_break_the_value_check() -> None:
     result = ground_answer("Invoice INV-1001 was issued for 1240 on 2026-03-14.", evidence)
 
     assert len(result.citations) == 1
+
+
+def test_an_answer_drawing_on_several_spans_is_still_cited() -> None:
+    """An answer that lists items from several records carries numbers
+    that no single span holds. Requiring the cited span to contain every
+    number would refuse the whole answer, so fabricated values are judged
+    against all retrieved evidence rather than against one span.
+    """
+    evidence = [
+        _span("work_order_id: WO-3003 | work_type: inspection | status: open"),
+        _span("work_order_id: WO-3005 | work_type: line repair | status: open"),
+    ]
+
+    result = ground_answer("The open work orders are WO-3003 and WO-3005.", evidence)
+
+    assert len(result.citations) == 1
+    assert result.unsupported_assertions == []
+
+
+def test_a_value_in_no_retrieved_span_is_still_rejected() -> None:
+    """The looser numeric rule must not stop catching an invented value."""
+    evidence = [
+        _span("work_order_id: WO-3003 | work_type: inspection | status: open"),
+        _span("work_order_id: WO-3005 | work_type: line repair | status: open"),
+    ]
+
+    result = ground_answer("The open work orders are WO-3003 and WO-9999.", evidence)
+
+    assert result.citations == []

@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-813349874faf677a",
+        "name": "search",
+        "arguments": {
+          "query": "ACC-1 remaining balance"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 184,
+      "completion_tokens": 40
+    }
+  }
+}

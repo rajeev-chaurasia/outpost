@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The available documents do not contain any information about the current spot price of copper wire.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 635,
+      "completion_tokens": 73
+    }
+  }
+}

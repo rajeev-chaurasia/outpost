@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-883a169bdf51e19d",
+        "name": "search",
+        "arguments": {
+          "query": "work orders open"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 180,
+      "completion_tokens": 64
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-9f8b800f40301ab2",
+        "name": "search",
+        "arguments": {
+          "query": "February salesperson deals"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1845,
+      "completion_tokens": 87
+    }
+  }
+}

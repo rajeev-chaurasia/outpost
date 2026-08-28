@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "Open work orders are WO\u20113003 (inspection) and WO\u20113005 (line repair).",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 619,
+      "completion_tokens": 24
+    }
+  }
+}

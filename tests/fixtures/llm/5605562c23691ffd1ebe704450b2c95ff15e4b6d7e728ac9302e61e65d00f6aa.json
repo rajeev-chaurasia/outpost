@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-81662117520ee135",
+        "name": "search",
+        "arguments": {
+          "query": "settlement time industry average"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 640,
+      "completion_tokens": 56
+    }
+  }
+}

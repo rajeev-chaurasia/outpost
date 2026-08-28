@@ -3,7 +3,7 @@
     "content": null,
     "tool_calls": [
       {
-        "id": "chatcmpl-tool-adb8686708099472",
+        "id": "chatcmpl-tool-b0118ce8721c5b88",
         "name": "search",
         "arguments": {
           "query": "INV-1001"
@@ -12,7 +12,7 @@
     ],
     "usage": {
       "prompt_tokens": 190,
-      "completion_tokens": 44
+      "completion_tokens": 41
     }
   }
 }

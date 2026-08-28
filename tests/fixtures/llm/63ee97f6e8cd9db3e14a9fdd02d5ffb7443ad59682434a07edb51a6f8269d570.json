@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8826a5945b3fee4d",
+        "name": "search",
+        "arguments": {
+          "query": "copper wire spot price"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 183,
+      "completion_tokens": 131
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-87dd436c094c0253",
+        "name": "search",
+        "arguments": {
+          "query": "settlement time policy"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1549,
+      "completion_tokens": 65
+    }
+  }
+}

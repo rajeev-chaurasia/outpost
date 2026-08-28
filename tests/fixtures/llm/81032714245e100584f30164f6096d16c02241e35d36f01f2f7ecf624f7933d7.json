@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-bb743bfbb7dd1ffa",
+        "name": "search",
+        "arguments": {
+          "query": "employee headcount"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 730,
+      "completion_tokens": 46
+    }
+  }
+}

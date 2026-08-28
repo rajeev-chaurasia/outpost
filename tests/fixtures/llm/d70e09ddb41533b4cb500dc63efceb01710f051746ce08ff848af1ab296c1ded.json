@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-a9b3a4607163db18",
+        "name": "search",
+        "arguments": {
+          "query": "POL-501 claims"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 182,
+      "completion_tokens": 43
+    }
+  }
+}

@@ -139,7 +139,7 @@ def _negation_cues(text: str) -> set[str]:
     return {word for word in _WORD_RE.findall(text.lower()) if word in _NEGATIONS}
 
 
-def _contradicts(sentence: str, span_text: str) -> bool:
+def _contradicts(sentence: str, span_text: str, all_evidence: set[str]) -> bool:
     """Rejects a span that shares the sentence's vocabulary but not its
     meaning.
 
@@ -147,9 +147,14 @@ def _contradicts(sentence: str, span_text: str) -> bool:
     leaving overlap almost unchanged:
 
     introduced negation
-        "was not paid in full" against a source saying it was paid.
-    substituted value
-        "$9,999.00" against a source saying $1,240.00.
+        "was not paid in full" against a source saying it was paid. This
+        is checked against the candidate span, since a citation must not
+        point at text the sentence contradicts.
+    fabricated value
+        "$9,999.00" where no retrieved evidence mentions that amount.
+        This is checked against every retrieved span rather than the
+        candidate alone, because an answer that draws on several records
+        legitimately carries numbers the one span it cites does not.
 
     Neither check is entailment. They catch the two ways a borrowed
     sentence most often inverts its source, and anything subtler still
@@ -157,7 +162,7 @@ def _contradicts(sentence: str, span_text: str) -> bool:
     """
     if _negation_cues(sentence) - _negation_cues(span_text):
         return True
-    return bool(_numbers(sentence) - _numbers(span_text))
+    return bool(_numbers(sentence) - all_evidence)
 
 
 def ground_answer(
@@ -168,6 +173,10 @@ def ground_answer(
     does not contradict the sentence.
     """
     span_tokens = [(span, _tokens(span.text)) for span in evidence_spans]
+    # Numbers anywhere in the retrieved evidence count as attested. A
+    # value appearing in none of it is the fabricated case worth
+    # rejecting.
+    evidence_numbers = {value for span in evidence_spans for value in _numbers(span.text)}
     citations: list[Citation] = []
     unsupported: list[str] = []
 
@@ -179,7 +188,7 @@ def ground_answer(
         best_span: Span | None = None
         best_ratio = 0.0
         for span, tokens in span_tokens:
-            if _contradicts(sentence, span.text):
+            if _contradicts(sentence, span.text, evidence_numbers):
                 continue
             ratio = _overlap_ratio(assertion_tokens, tokens)
             if ratio > best_ratio:

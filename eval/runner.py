@@ -25,7 +25,7 @@ from typing import Any
 from eval.degradation.force import run_all as run_degradation
 from eval.grounding.entailment import load_cases as load_entailment_cases
 from eval.grounding.entailment import run as run_entailment
-from eval.grounding.score import score as run_grounding
+from eval.grounding.suite import score as run_grounding
 from eval.isolation.adversarial import build_multi_tenant_index, load_cases, run_isolation_suite
 from eval.isolation.adversarial import summarize as summarize_isolation
 

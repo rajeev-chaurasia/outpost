@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-9ab313837a7b9e3c",
+        "name": "search",
+        "arguments": {
+          "query": "INV-1006"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 185,
+      "completion_tokens": 44
+    }
+  }
+}

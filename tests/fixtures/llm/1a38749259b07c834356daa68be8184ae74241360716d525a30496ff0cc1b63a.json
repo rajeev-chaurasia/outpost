@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-ba2b933b79ca1c20",
+        "name": "search",
+        "arguments": {
+          "query": "salesperson closed most deals February dealer performance report"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 761,
+      "completion_tokens": 49
+    }
+  }
+}

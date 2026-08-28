@@ -20,10 +20,13 @@ from dotenv import load_dotenv  # noqa: E402
 load_dotenv(REPO_ROOT / ".env")
 
 from eval.grounding.scenarios import SCENARIOS, GroundingScenario  # noqa: E402
+from eval.grounding.suite import load_cases as load_grounding_cases  # noqa: E402
+from eval.grounding.suite import system_prompt_for  # noqa: E402
 from outpost.agent.plan import PlanResult  # noqa: E402
 from outpost.agent.plan import run as run_plan  # noqa: E402
 from outpost.agent.tools import ActionGatedTool, FlagDiscrepancyTool, SearchTool  # noqa: E402
 from outpost.llm.base import Completion, Message, ToolSpec  # noqa: E402
+from outpost.llm.errors import ProviderError  # noqa: E402
 from outpost.llm.openai_compatible import OpenAICompatibleProvider  # noqa: E402
 from outpost.llm.recorded import request_key  # noqa: E402
 from outpost.ontology import discover_tenant_ids  # noqa: E402
@@ -49,12 +52,17 @@ def _run_filling_embedding_gaps(
     run_once: "callable[[], PlanResult]",
     dense_store: DenseStore,
     embedding_client: NvidiaEmbeddingClient,
-    max_attempts: int = 5,
+    max_attempts: int = 20,
 ) -> PlanResult:
     """The agent's own model decides what to search for, so the exact
     query text isn't known ahead of time. On a cache miss this embeds
     the missing text live, persists it, and retries, rather than trying
     to pre-guess every phrasing the model might choose.
+
+    The retry budget is generous because a question the corpus cannot
+    answer is the expensive case: the model reformulates its search
+    several times before giving up, and each new phrasing is another
+    cache miss.
     """
     for _ in range(max_attempts):
         try:
@@ -128,7 +136,7 @@ def _record_one_scenario(
 
 def record_grounding_scenarios() -> None:
     """Records one search-then-answer turn per tenant from
-    eval.grounding.scenarios, the same source eval/grounding/score.py
+    eval.grounding.scenarios, the same source eval/grounding/suite.py
     reads, so a fixture is always generated for the exact wording that
     will later be replayed.
     """
@@ -172,6 +180,28 @@ def record_declined_write_action() -> None:
     )
     print("declined_write_action steps:", result.steps)
     print("declined_write_action final_content:", result.final_content)
+
+
+def record_grounding_suite() -> None:
+    """Records every question in eval/grounding/cases.yaml, including the
+    ones the corpus cannot answer, since a refusal has to be recorded to
+    be replayed.
+    """
+    lexical_index, dense_store = _build_index()
+    embedding_client = NvidiaEmbeddingClient()
+
+    for case in load_grounding_cases():
+        scenario = GroundingScenario(
+            tenant_id=case.tenant_id,
+            system_prompt=system_prompt_for(case.tenant_id),
+            user_request=case.question,
+        )
+        # One case failing must not abandon the rest, so the run can be
+        # repeated to fill whatever is still missing.
+        try:
+            _record_one_scenario(scenario, lexical_index, dense_store, embedding_client)
+        except (RuntimeError, ProviderError) as exc:
+            print(f"[{case.tenant_id}] SKIPPED {case.question!r}: {exc}")
 
 
 if __name__ == "__main__":

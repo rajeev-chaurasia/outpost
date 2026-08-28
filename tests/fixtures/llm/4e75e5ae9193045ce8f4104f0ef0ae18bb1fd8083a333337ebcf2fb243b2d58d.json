@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "Payments made by check are PAY\u20112 (for invoice\u202fINV\u20111002, $900.00) and PAY\u20115 (for invoice\u202fINV\u20111006, $300.00).",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 739,
+      "completion_tokens": 96
+    }
+  }
+}

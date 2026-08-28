@@ -4,7 +4,7 @@
     "tool_calls": [],
     "usage": {
       "prompt_tokens": 648,
-      "completion_tokens": 24
+      "completion_tokens": 88
     }
   }
 }

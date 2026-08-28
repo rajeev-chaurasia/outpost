@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The records show CLM\u20112001 is still open and only an initial documentation review has been logged; there is no indication that the reinsurance carrier has approved the claim.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 640,
+      "completion_tokens": 108
+    }
+  }
+}

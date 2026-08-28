@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-98950c76a8ceff98",
+        "name": "search",
+        "arguments": {
+          "query": "salesperson"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1334,
+      "completion_tokens": 47
+    }
+  }
+}

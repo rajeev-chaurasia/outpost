@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-83ee112b4f9a6915",
+        "name": "search",
+        "arguments": {
+          "query": "employees"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1616,
+      "completion_tokens": 75
+    }
+  }
+}

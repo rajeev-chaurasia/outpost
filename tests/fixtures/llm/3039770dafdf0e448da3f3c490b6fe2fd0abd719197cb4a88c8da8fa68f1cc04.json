@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "I\u2019m sorry, but I don\u2019t have any information on the industry\u2019s average claim settlement time.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 622,
+      "completion_tokens": 77
+    }
+  }
+}

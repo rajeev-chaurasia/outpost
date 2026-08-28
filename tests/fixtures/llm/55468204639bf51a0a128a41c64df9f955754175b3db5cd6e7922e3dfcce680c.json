@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8867015ea4d55971",
+        "name": "search",
+        "arguments": {
+          "query": "employee headcount this quarter dealership"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 184,
+      "completion_tokens": 62
+    }
+  }
+}

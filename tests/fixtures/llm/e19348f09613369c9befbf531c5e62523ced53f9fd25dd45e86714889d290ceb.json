@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The scheduled work type for work order\u202fWO\u20113001 was **meter replacement**.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 620,
+      "completion_tokens": 22
+    }
+  }
+}

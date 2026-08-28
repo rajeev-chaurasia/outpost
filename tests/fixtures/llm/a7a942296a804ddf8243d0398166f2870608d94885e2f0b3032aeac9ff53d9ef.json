@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-9036f8052d4866e9",
+        "name": "search",
+        "arguments": {
+          "query": "SA-900 service level"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 183,
+      "completion_tokens": 44
+    }
+  }
+}

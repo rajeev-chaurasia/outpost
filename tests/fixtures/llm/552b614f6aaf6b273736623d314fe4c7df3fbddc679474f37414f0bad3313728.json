@@ -3,7 +3,7 @@
     "content": null,
     "tool_calls": [
       {
-        "id": "chatcmpl-tool-aa11dd2783de0bc2",
+        "id": "chatcmpl-tool-91e1766b01b49cc4",
         "name": "search",
         "arguments": {
           "query": "POL-500 deductible policyholder"
@@ -12,7 +12,7 @@
     ],
     "usage": {
       "prompt_tokens": 189,
-      "completion_tokens": 45
+      "completion_tokens": 50
     }
   }
 }

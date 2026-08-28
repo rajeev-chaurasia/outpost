@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The claims associated with policy\u202fPOL\u2011501 are CLM\u20112002 and CLM\u20112005.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 674,
+      "completion_tokens": 26
+    }
+  }
+}

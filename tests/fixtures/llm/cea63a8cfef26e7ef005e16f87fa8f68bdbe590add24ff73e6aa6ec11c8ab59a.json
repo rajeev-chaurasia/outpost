@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8a44617f8234f861",
+        "name": "search",
+        "arguments": {
+          "query": "POL-500 expiration"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 180,
+      "completion_tokens": 44
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The remaining balance on account\u202fACC\u20111 is **$325.00** (as of\u202f2026\u201104\u201105).",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 744,
+      "completion_tokens": 80
+    }
+  }
+}

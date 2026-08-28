@@ -62,7 +62,31 @@ def test_grounding_artifact_reports_every_tenant_separately() -> None:
     tenants_dir = Path(__file__).resolve().parents[1] / "tenants"
     from outpost.ontology import discover_tenant_ids
 
-    assert set(payload) == set(discover_tenant_ids(tenants_dir))
+    assert set(payload["per_tenant"]) == set(discover_tenant_ids(tenants_dir))
+
+
+def test_grounding_artifact_scores_enough_assertions_to_mean_something() -> None:
+    """A rate over one assertion per tenant is an anecdote. This pins the
+    denominator so the unsupported rate cannot quietly shrink back to it.
+    """
+    payload = json.loads((ARTIFACTS_DIR / "grounding_results.json").read_text())
+
+    assert payload["totals"]["assertions_scored"] >= 12
+    for tenant, stats in payload["per_tenant"].items():
+        assert stats["assertions_scored"] >= 3, tenant
+
+
+def test_grounding_artifact_neither_over_refuses_nor_over_answers() -> None:
+    """Both rates together, because either alone is gameable: refusing
+    everything scores a perfect refusal rate, and answering only easy
+    questions scores a perfect unsupported rate.
+    """
+    payload = json.loads((ARTIFACTS_DIR / "grounding_results.json").read_text())
+
+    assert payload["totals"]["correct_refusal_rate"] == 1.0
+    for tenant, stats in payload["per_tenant"].items():
+        assert stats["refused_when_it_should_have_answered"] == [], tenant
+        assert stats["answered_when_it_should_have_refused"] == [], tenant
 
 
 def test_entailment_artifact_reports_no_false_citations() -> None:

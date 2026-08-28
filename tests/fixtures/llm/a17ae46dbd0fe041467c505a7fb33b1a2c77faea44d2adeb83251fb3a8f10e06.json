@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-92a8df197295887a",
+        "name": "search",
+        "arguments": {
+          "query": "crew certified high voltage"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1079,
+      "completion_tokens": 52
+    }
+  }
+}

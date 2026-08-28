@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-81b0b83f0e1ca3e2",
+        "name": "search",
+        "arguments": {
+          "query": "WO-3001"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 186,
+      "completion_tokens": 49
+    }
+  }
+}

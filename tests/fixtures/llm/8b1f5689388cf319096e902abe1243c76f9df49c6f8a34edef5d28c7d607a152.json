@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-b5b7359012e1ab27",
+        "name": "search",
+        "arguments": {
+          "query": "quarter headcount"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1583,
+      "completion_tokens": 80
+    }
+  }
+}

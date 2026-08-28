@@ -25,6 +25,7 @@ or CI, which only ever read the committed artifact this writes.
 
 import json
 import time
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -54,11 +55,12 @@ def _percentile(values: list[float], pct: float) -> float:
     return ordered[index]
 
 
-def _stats(samples_ms: list[float], failures: int, sample_count: int) -> dict[str, Any]:
+def _stats(samples_ms: list[float], failures: Counter[str], sample_count: int) -> dict[str, Any]:
     return {
         "sample_count": sample_count,
         "successful_samples": len(samples_ms),
-        "failed_samples": failures,
+        "failed_samples": sum(failures.values()),
+        "failure_kinds": dict(failures),
         "p50_ms": round(_percentile(samples_ms, 50), 1),
         "p90_ms": round(_percentile(samples_ms, 90), 1),
         "max_ms": round(max(samples_ms), 1) if samples_ms else 0.0,
@@ -70,19 +72,32 @@ def _prompt(i: int) -> list[Message]:
     return [Message(role="user", content=f"Reply with the single word ok. ({i})")]
 
 
-def _run_arm(provider: Provider, sample_count: int) -> tuple[list[float], int]:
+def _classify(exc: ProviderError) -> str:
+    """Names the failure mode so the artifact records what happened
+    rather than leaving the mechanism to be guessed at afterward.
+    """
+    detail = exc.detail.lower()
+    if "timed out" in detail or "timeout" in detail:
+        return "client_timeout"
+    for status in ("429", "500", "502", "503", "504"):
+        if status in detail:
+            return f"http_{status}"
+    return "other"
+
+
+def _run_arm(provider: Provider, sample_count: int) -> tuple[list[float], Counter[str]]:
     # A request that errors or times out is recorded as a failure rather
     # than aborting the whole measurement: a model that only sometimes
     # answers is itself a real, worth-reporting result.
     samples_ms: list[float] = []
-    failures = 0
+    failures: Counter[str] = Counter()
     for i in range(sample_count):
         start = time.monotonic()
         try:
             provider.complete(_prompt(i))
             samples_ms.append((time.monotonic() - start) * 1000)
-        except ProviderError:
-            failures += 1
+        except ProviderError as exc:
+            failures[_classify(exc)] += 1
     return samples_ms, failures
 
 
@@ -99,17 +114,19 @@ class _TimedInner:
         self, messages: list[Message], *, tools: list[ToolSpec] | None = None
     ) -> Completion:
         start = time.monotonic()
-        try:
-            return self.inner.complete(messages, tools=tools)
-        finally:
-            self.service_ms.append((time.monotonic() - start) * 1000)
+        completion = self.inner.complete(messages, tools=tools)
+        # Recorded only on success. Timing a call that timed out would
+        # fold the client deadline into the latency distribution and make
+        # a failing arm look merely slow.
+        self.service_ms.append((time.monotonic() - start) * 1000)
+        return completion
 
 
 def measure_raw(model: str, sample_count: int) -> dict[str, Any]:
     provider = OpenAICompatibleProvider(model=model, timeout_seconds=RAW_TIMEOUT_SECONDS)
     samples, failures = _run_arm(provider, sample_count)
     stats = _stats(samples, failures, sample_count)
-    stats["within_budget"] = bool(samples) and stats["max_ms"] <= BUDGET_MS and failures == 0
+    stats["within_budget"] = bool(samples) and stats["max_ms"] <= BUDGET_MS and not failures
     return stats
 
 
@@ -121,7 +138,7 @@ def measure_paced(model: str, sample_count: int) -> dict[str, Any]:
     stats = _stats(timed.service_ms, failures, sample_count)
     stats["pacing_interval_seconds"] = PACING_INTERVAL_SECONDS
     stats["within_budget"] = (
-        bool(timed.service_ms) and stats["max_ms"] <= BUDGET_MS and failures == 0
+        bool(timed.service_ms) and stats["max_ms"] <= BUDGET_MS and not failures
     )
     return stats
 
@@ -132,7 +149,7 @@ def measure_budget_enforced(sample_count: int) -> dict[str, Any]:
     """
     fallbacks = 0
     samples_ms: list[float] = []
-    failures = 0
+    failures: Counter[str] = Counter()
 
     for i in range(sample_count):
         provider = FallbackProvider(
@@ -147,8 +164,8 @@ def measure_budget_enforced(sample_count: int) -> dict[str, Any]:
         try:
             provider.complete(_prompt(i))
             samples_ms.append((time.monotonic() - start) * 1000)
-        except ProviderError:
-            failures += 1
+        except ProviderError as exc:
+            failures[_classify(exc)] += 1
         if provider.fell_back:
             fallbacks += 1
 

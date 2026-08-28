@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-b0864e2fcc39f28f",
+        "name": "search",
+        "arguments": {
+          "query": "high voltage certification crew"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1073,
+      "completion_tokens": 63
+    }
+  }
+}

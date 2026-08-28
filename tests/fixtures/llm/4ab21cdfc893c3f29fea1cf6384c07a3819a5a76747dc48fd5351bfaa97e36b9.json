@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8d1d5895db22e03c",
+        "name": "search",
+        "arguments": {
+          "query": "service agreement crew certified high voltage"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1538,
+      "completion_tokens": 59
+    }
+  }
+}

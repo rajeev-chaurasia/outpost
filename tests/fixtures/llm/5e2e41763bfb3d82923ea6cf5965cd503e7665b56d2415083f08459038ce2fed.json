@@ -1,0 +1,10 @@
+{
+  "response": {
+    "content": "The claim CLM-2001 requested an amount of\u202f$4,500.00.",
+    "tool_calls": [],
+    "usage": {
+      "prompt_tokens": 686,
+      "completion_tokens": 23
+    }
+  }
+}

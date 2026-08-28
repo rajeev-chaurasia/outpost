@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-9f1c8f7370704223",
+        "name": "search",
+        "arguments": {
+          "query": "replacing a meter note technician"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 183,
+      "completion_tokens": 49
+    }
+  }
+}

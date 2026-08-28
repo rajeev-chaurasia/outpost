@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8a464ed39078d615",
+        "name": "search",
+        "arguments": {
+          "query": "February closed deals salesperson most deals February dealership accounts receivable statement"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 182,
+      "completion_tokens": 65
+    }
+  }
+}

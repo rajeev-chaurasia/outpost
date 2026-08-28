@@ -1,0 +1,18 @@
+{
+  "response": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "chatcmpl-tool-8412bbd2487e38c4",
+        "name": "search",
+        "arguments": {
+          "query": "POL-500 coverage type"
+        }
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 182,
+      "completion_tokens": 45
+    }
+  }
+}
