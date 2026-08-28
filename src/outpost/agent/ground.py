@@ -16,6 +16,29 @@ from outpost.retrieval.document import Span
 
 _SENTENCE_RE = re.compile(r"[^.!?]+[.!?]?")
 _WORD_RE = re.compile(r"[a-z0-9]+")
+_NUMBER_RE = re.compile(r"\d+(?:\.\d+)?")
+
+# Cues that flip a sentence's polarity relative to its source.
+_NEGATIONS = frozenset(
+    {
+        "no",
+        "not",
+        "never",
+        "cannot",
+        "cant",
+        "wasnt",
+        "isnt",
+        "arent",
+        "didnt",
+        "doesnt",
+        "without",
+        "denied",
+        "refused",
+        "declined",
+        "unpaid",
+        "outstanding",
+    }
+)
 # Two non-terminal uses of "." get mistaken for sentence endings by the
 # naive splitter below: a decimal point ($500.00 must not split into
 # "$500." and "00") and a name initial (J. Rivera must not split into
@@ -99,11 +122,50 @@ def _split_sentences(answer: str) -> list[str]:
     ]
 
 
+def _numbers(text: str) -> set[str]:
+    """Numeric values in text, with thousands separators removed and
+    trailing zeros normalized, so $1,240.00 and 1240 compare equal.
+    """
+    values = set()
+    for raw in _NUMBER_RE.findall(text.replace(",", "")):
+        normalized = raw.rstrip(".")
+        if "." in normalized:
+            normalized = normalized.rstrip("0").rstrip(".")
+        values.add(normalized or "0")
+    return values
+
+
+def _negation_cues(text: str) -> set[str]:
+    return {word for word in _WORD_RE.findall(text.lower()) if word in _NEGATIONS}
+
+
+def _contradicts(sentence: str, span_text: str) -> bool:
+    """Rejects a span that shares the sentence's vocabulary but not its
+    meaning.
+
+    Token overlap cannot see either of these, and both flip meaning while
+    leaving overlap almost unchanged:
+
+    introduced negation
+        "was not paid in full" against a source saying it was paid.
+    substituted value
+        "$9,999.00" against a source saying $1,240.00.
+
+    Neither check is entailment. They catch the two ways a borrowed
+    sentence most often inverts its source, and anything subtler still
+    gets through, which the entailment eval measures.
+    """
+    if _negation_cues(sentence) - _negation_cues(span_text):
+        return True
+    return bool(_numbers(sentence) - _numbers(span_text))
+
+
 def ground_answer(
     answer: str, evidence_spans: list[Span], *, overlap_threshold: float = 0.6
 ) -> GroundingResult:
     """Splits answer into sentences and binds each one to whichever
-    evidence span best supports it, if any span clears the threshold.
+    evidence span best supports it, if any span clears the threshold and
+    does not contradict the sentence.
     """
     span_tokens = [(span, _tokens(span.text)) for span in evidence_spans]
     citations: list[Citation] = []
@@ -117,6 +179,8 @@ def ground_answer(
         best_span: Span | None = None
         best_ratio = 0.0
         for span, tokens in span_tokens:
+            if _contradicts(sentence, span.text):
+                continue
             ratio = _overlap_ratio(assertion_tokens, tokens)
             if ratio > best_ratio:
                 best_ratio = ratio

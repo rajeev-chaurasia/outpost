@@ -70,3 +70,53 @@ def test_name_initial_does_not_split_the_sentence() -> None:
     assert result.unsupported_assertions == []
     assert len(result.citations) == 1
     assert result.citations[0].assertion == answer
+
+
+def test_negation_is_not_cited_as_support() -> None:
+    """A sentence that borrows the source's words while inverting its
+    meaning must not receive a citation. Token overlap alone cannot see
+    this, which is why grounding checks negation parity separately.
+    """
+    evidence = [_span("payment PAY-1 received 2026-03-15 for $1,240.00 via ach, paid in full")]
+
+    result = ground_answer(
+        "Payment PAY-1 was not received via ACH, and is not paid in full.", evidence
+    )
+
+    assert result.citations == []
+    assert len(result.unsupported_assertions) == 1
+
+
+def test_a_substituted_value_is_not_cited_as_support() -> None:
+    evidence = [_span("the deductible on this policy is $500.00 for the current term")]
+
+    result = ground_answer(
+        "The deductible on this policy is $9,999.00 for the current term.", evidence
+    )
+
+    assert result.citations == []
+
+
+def test_a_faithful_restatement_is_still_cited() -> None:
+    """The contradiction guards must not reject honest paraphrase, or
+    they would trade false citations for false refusals.
+    """
+    evidence = [_span("the deductible on this policy is $500.00 for the current term")]
+
+    result = ground_answer(
+        "The deductible on this policy is $500.00 for the current term.", evidence
+    )
+
+    assert len(result.citations) == 1
+    assert result.unsupported_assertions == []
+
+
+def test_currency_formatting_does_not_break_the_value_check() -> None:
+    """$1,240.00 and 1240 are the same value, so a thousands separator or
+    a trailing zero must not read as a substituted number.
+    """
+    evidence = [_span("invoice INV-1001 was issued for $1,240.00 on 2026-03-14")]
+
+    result = ground_answer("Invoice INV-1001 was issued for 1240 on 2026-03-14.", evidence)
+
+    assert len(result.citations) == 1

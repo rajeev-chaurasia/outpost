@@ -1,0 +1,83 @@
+# Does a citation mean the source supports the sentence, or only that the
+# sentence reuses the source's words?
+#
+# Each case pairs one source text with one assertion and states whether a
+# citation is correct. The categories are chosen to separate those two
+# things:
+#
+#   faithful       restates the source                    -> cite
+#   negated        same words, meaning inverted           -> do not cite
+#   swapped_value  same shape, a number or name changed   -> do not cite
+#   unrelated      different subject entirely             -> do not cite
+#
+# The negated and swapped_value cases are the ones that matter. Token
+# overlap cannot tell them apart from faithful ones, so this measures how
+# far the current grounding is from entailment rather than asserting it
+# is close.
+
+cases:
+  # --- dealer_ar ---
+  - tenant_id: dealer_ar
+    category: faithful
+    source: "Invoice INV-1001 issued 2026-03-14 for $1,240.00, due 2026-04-13. Payment PAY-1 received 2026-03-15 for $1,240.00 via ACH. Invoice paid in full."
+    assertion: "Invoice INV-1001 was paid in full on 2026-03-15 via ACH."
+    should_cite: true
+  - tenant_id: dealer_ar
+    category: negated
+    source: "Invoice INV-1001 issued 2026-03-14 for $1,240.00, due 2026-04-13. Payment PAY-1 received 2026-03-15 for $1,240.00 via ACH. Invoice paid in full."
+    assertion: "Invoice INV-1001 was not paid in full on 2026-03-15 via ACH."
+    should_cite: false
+  - tenant_id: dealer_ar
+    category: swapped_value
+    source: "Invoice INV-1001 issued 2026-03-14 for $1,240.00, due 2026-04-13. Payment PAY-1 received 2026-03-15 for $1,240.00 via ACH. Invoice paid in full."
+    assertion: "Invoice INV-1001 was paid in full on 2026-03-15 for $9,999.00 via ACH."
+    should_cite: false
+  - tenant_id: dealer_ar
+    category: unrelated
+    source: "Invoice INV-1001 issued 2026-03-14 for $1,240.00, due 2026-04-13. Payment PAY-1 received 2026-03-15 for $1,240.00 via ACH. Invoice paid in full."
+    assertion: "The dealership will be closed for the public holiday next Monday."
+    should_cite: false
+
+  # --- claims_intake ---
+  - tenant_id: claims_intake
+    category: faithful
+    source: "Policy Declaration Policy Number: POL-500 Holder: J. Rivera Coverage: Comprehensive Auto Effective: 2026-01-01 Expiration: 2026-12-31 Deductible: $500.00"
+    assertion: "Policy POL-500 has a deductible of $500.00 and is held by J. Rivera."
+    should_cite: true
+  - tenant_id: claims_intake
+    category: negated
+    source: "Policy Declaration Policy Number: POL-500 Holder: J. Rivera Coverage: Comprehensive Auto Effective: 2026-01-01 Expiration: 2026-12-31 Deductible: $500.00"
+    assertion: "Policy POL-500 has no deductible and is not held by J. Rivera."
+    should_cite: false
+  - tenant_id: claims_intake
+    category: swapped_value
+    source: "Policy Declaration Policy Number: POL-500 Holder: J. Rivera Coverage: Comprehensive Auto Effective: 2026-01-01 Expiration: 2026-12-31 Deductible: $500.00"
+    assertion: "Policy POL-500 has a deductible of $5,000.00 and is held by M. Chen."
+    should_cite: false
+  - tenant_id: claims_intake
+    category: unrelated
+    source: "Policy Declaration Policy Number: POL-500 Holder: J. Rivera Coverage: Comprehensive Auto Effective: 2026-01-01 Expiration: 2026-12-31 Deductible: $500.00"
+    assertion: "Adjusters must complete continuing education credits every two years."
+    should_cite: false
+
+  # --- utility_ops ---
+  - tenant_id: utility_ops
+    category: faithful
+    source: "Service Agreement Declaration Agreement Number: SA-900 Account: ACC-701 Service Level: Priority Effective: 2026-01-01 Expiration: 2026-12-31 Response Time: 4 hours"
+    assertion: "Agreement SA-900 for account ACC-701 has a response time of 4 hours."
+    should_cite: true
+  - tenant_id: utility_ops
+    category: negated
+    source: "Service Agreement Declaration Agreement Number: SA-900 Account: ACC-701 Service Level: Priority Effective: 2026-01-01 Expiration: 2026-12-31 Response Time: 4 hours"
+    assertion: "Agreement SA-900 for account ACC-701 does not guarantee a response time of 4 hours."
+    should_cite: false
+  - tenant_id: utility_ops
+    category: swapped_value
+    source: "Service Agreement Declaration Agreement Number: SA-900 Account: ACC-701 Service Level: Priority Effective: 2026-01-01 Expiration: 2026-12-31 Response Time: 4 hours"
+    assertion: "Agreement SA-900 for account ACC-701 has a response time of 48 hours."
+    should_cite: false
+  - tenant_id: utility_ops
+    category: unrelated
+    source: "Service Agreement Declaration Agreement Number: SA-900 Account: ACC-701 Service Level: Priority Effective: 2026-01-01 Expiration: 2026-12-31 Response Time: 4 hours"
+    assertion: "Crews should carry spare fuses on every inspection route."
+    should_cite: false

@@ -1,5 +1,6 @@
 {
   "degradation_results.json": "b5473cef5e97c93d3347043c35de7a1ce3ce4d650deff05464a52696b08fc560",
+  "entailment_results.json": "43f5f0f51dd22f457615c6ffaf1579a2d975d947f51711e6eb4bea50a0da5427",
   "grounding_results.json": "6bf5a92c30a5f54af7f8b6c67a038f583bd5aa07b5dcecdb4d8fe270d2f8383e",
   "isolation_results.json": "3bc318d3b382d815bfad3afe44ed20e75f2627f84f14ac207d4e752873c00481",
   "latency_results.json": "323f41fe57baaba0fa78350a59618bcf2d34eaf1cf8942c1ac40685b32c0cc6a",

@@ -63,3 +63,28 @@ def test_grounding_artifact_reports_every_tenant_separately() -> None:
     from outpost.ontology import discover_tenant_ids
 
     assert set(payload) == set(discover_tenant_ids(tenants_dir))
+
+
+def test_entailment_artifact_reports_no_false_citations() -> None:
+    """Grounding must not cite a span that contradicts the sentence. The
+    adversarial cases are negation-inverted and value-substituted claims
+    that share nearly all their vocabulary with the source, so overlap
+    alone would cite them.
+    """
+    payload = json.loads((ARTIFACTS_DIR / "entailment_results.json").read_text())
+
+    assert payload["case_count"] == payload["correct"]
+    assert payload["false_citations_on_adversarial"] == 0
+    assert payload["false_citation_rate"] == 0.0
+    assert payload["misclassified"] == []
+
+
+def test_entailment_artifact_still_cites_faithful_restatements() -> None:
+    """Rejecting every adversarial case would be trivial to achieve by
+    citing nothing, so the faithful cases have to still be cited.
+    """
+    payload = json.loads((ARTIFACTS_DIR / "entailment_results.json").read_text())
+    faithful = payload["per_category"]["faithful"]
+
+    assert faithful["cases"] > 0
+    assert faithful["cited"] == faithful["cases"]

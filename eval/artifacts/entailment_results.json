@@ -1,0 +1,30 @@
+{
+  "adversarial_case_count": 6,
+  "case_count": 12,
+  "correct": 12,
+  "false_citation_rate": 0.0,
+  "false_citations_on_adversarial": 0,
+  "misclassified": [],
+  "per_category": {
+    "faithful": {
+      "cases": 3,
+      "cited": 3,
+      "correct": 3
+    },
+    "negated": {
+      "cases": 3,
+      "cited": 0,
+      "correct": 3
+    },
+    "swapped_value": {
+      "cases": 3,
+      "cited": 0,
+      "correct": 3
+    },
+    "unrelated": {
+      "cases": 3,
+      "cited": 0,
+      "correct": 3
+    }
+  }
+}

@@ -23,6 +23,8 @@ from pathlib import Path
 from typing import Any
 
 from eval.degradation.force import run_all as run_degradation
+from eval.grounding.entailment import load_cases as load_entailment_cases
+from eval.grounding.entailment import run as run_entailment
 from eval.grounding.score import score as run_grounding
 from eval.isolation.adversarial import build_multi_tenant_index, load_cases, run_isolation_suite
 from eval.isolation.adversarial import summarize as summarize_isolation
@@ -31,7 +33,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 ARTIFACTS_DIR = REPO_ROOT / "eval" / "artifacts"
 MANIFEST_PATH = ARTIFACTS_DIR / "manifest.json"
 
-DETERMINISTIC_ARTIFACTS = ("isolation_results", "grounding_results", "degradation_results")
+DETERMINISTIC_ARTIFACTS = (
+    "isolation_results",
+    "grounding_results",
+    "degradation_results",
+    "entailment_results",
+)
 LIVE_ARTIFACTS = ("latency_results", "onboarding_results")
 
 
@@ -64,10 +71,15 @@ def regenerate_degradation() -> Any:
     return {"correct_rung_rate": correct / len(results), "scenarios": results}
 
 
+def regenerate_entailment() -> Any:
+    return run_entailment(load_entailment_cases())
+
+
 REGENERATORS = {
     "isolation_results": regenerate_isolation,
     "grounding_results": regenerate_grounding,
     "degradation_results": regenerate_degradation,
+    "entailment_results": regenerate_entailment,
 }
 
 
