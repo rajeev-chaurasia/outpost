@@ -141,40 +141,52 @@ Artifact: [`eval/artifacts/degradation_results.json`](eval/artifacts/degradation
 
 ### Latency
 
-20 sequential calls per model against the live API, in three arms. 20 samples cannot
-estimate a p99, so p50 and p90 are reported with the max stated separately as the tail.
+20 calls per arm against a declared budget of 8000 ms. 20 samples cannot support a p99, so
+p50 and p90 are reported with the max stated separately as the tail.
 
 | Arm | p50 | p90 | max | Answered |
 | :--- | ---: | ---: | ---: | :---: |
-| `gpt-oss-120b` raw | 3918 ms | 9419 ms | 12023 ms | 20 of 20 |
-| `gpt-oss-120b` paced | 3420 ms | 8002 ms | 8501 ms | 20 of 20 |
-| `gpt-oss-20b` raw | 1197 ms | 2284 ms | 5456 ms | 16 of 20 |
-| `gpt-oss-20b` paced | 1328 ms | 30133 ms | 30363 ms | 15 of 20 |
-| **Budget enforced, with fallback** | **3142 ms** | **9443 ms** | **15782 ms** | **19 of 20** |
+| `gpt-oss-120b` raw | 4372 ms | 5304 ms | 7678 ms | 20 of 20 |
+| `gpt-oss-120b` paced | 2738 ms | 6254 ms | 6422 ms | 20 of 20 |
+| `gpt-oss-20b` raw | 9242 ms | 27545 ms | 28038 ms | **10 of 20** |
+| `gpt-oss-20b` paced | 3314 ms | 28777 ms | 29299 ms | **14 of 20** |
+| **Budget enforced, with fallback** | **3096 ms** | **4806 ms** | **6413 ms** | **19 of 20** |
 
 Artifact: [`eval/artifacts/latency_results.json`](eval/artifacts/latency_results.json)
 
-The last row is what the system actually runs: the primary's transport deadline is set to
-the tenant's 8000 ms budget, so a slow call is cut off at the budget rather than run to
-completion, and the secondary model takes over. It fell back on 4 of 20 calls and answered
-19 of 20, against 16 of 20 for the smaller model alone. Worst case is bounded by two
-budgets, one for the cut-off primary plus one for the secondary, and the measured max of
-15782 ms sits under that 16000 ms ceiling.
+The last row is what the system runs. The primary's transport deadline is the tenant's
+budget, so a slow call is cut off at 8000 ms rather than run to completion and the secondary
+answers instead. On this run it fell back once, answered 19 of 20, and its slowest request
+finished in 6413 ms, inside a single budget. The design only guarantees two budgets, one
+cut-off attempt plus one real one, and an earlier run did reach 15782 ms.
 
+The comparison worth reading is the last two rows: `gpt-oss-20b` on its own answered 10 of
+20, and the same model as a fallback behind a deadline-bounded primary answered 19 of 20.
+
+**Every failure in every arm was a client timeout. Not one HTTP 429 was returned.** That
+rules out rate limiting, which would reject fast rather than hang.
+
+These numbers move a lot between runs. `gpt-oss-120b` p90 has come in at 5304, 8034, and
+9419 ms across three runs, and `gpt-oss-20b` failures at 4, 10, and 10 of 20. Treat any
+single run as one sample of a shared endpoint, not a property of the models.
 
 ## Null results and known gaps
 
 Measurements that came back negative, and the limits of what the system does today.
 
-**Request pacing does not reliably reduce latency.** Spacing calls two seconds apart
-improved `gpt-oss-120b` (p90 9419 ms to 8002 ms) and degraded `gpt-oss-20b` sharply (p90
-2284 ms to 30133 ms, five calls hitting the 30 second ceiling). The endpoint is variable
-rather than contended, so pacing is not the lever. `PacedProvider` exists so the
-measurement can be reproduced, and is deliberately not in the serving path.
+**Request pacing does not reliably reduce latency.** Across three runs it has helped and
+hurt in no stable pattern: on the latest it improved `gpt-oss-120b` p50 (4372 ms to 2738 ms)
+while worsening its p90, and recovered four of `gpt-oss-20b`'s ten failures. On an earlier
+run it made `gpt-oss-20b` sharply worse. Pacing is not the lever, and `PacedProvider` exists
+so the measurement can be reproduced rather than because the serving path uses it.
 
-What bounds latency instead is the transport deadline. The primary's socket timeout is the
-tenant's budget, so a slow call is cut off at 8000 ms and the secondary takes over. That
-path answers 19 of 20 against 16 of 20 for the smaller model alone.
+The mechanism is not what a hanging endpoint usually suggests. Every failure recorded across
+every arm is a client timeout, with zero HTTP 429 responses, so this is not rate limiting.
+Calls are accepted and then not answered within the deadline.
+
+What bounds latency is the transport deadline. The primary's socket timeout is the tenant's
+budget, so a slow call is cut off at 8000 ms and the secondary takes over. That path answered
+19 of 20 against 10 of 20 for the smaller model on its own.
 
 **A fallback costs more than one budget.** When the primary is cut off and the secondary
 answers, user-visible latency is one cut-off attempt plus one real one, so it exceeds a
